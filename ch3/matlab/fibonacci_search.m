@@ -1,6 +1,7 @@
 % Fibonacci_search
 function [a, b] = fibonacci_search(f, a, b, n, epsilon)
-    if nargin < 5
+    switch nargin 
+        case  4
         epsilon = 0.01;
     end
     golden = 1.61803;
