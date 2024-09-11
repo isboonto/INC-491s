@@ -4,17 +4,18 @@ function [a, c] = bracket_minimum(f, x, s, k)
 % s: step size 
 % k: gamma (weight multiplier) 
 % last change 20/8/2024
-
-  if nargin < 4
-    k = 2.0;
-  elseif nargin < 3
-    s = 1e-2; k = 2.0;
-  elseif nargin < 2
-    x = 0; s = 1e-2; k = 2.0;
+    
+  switch nargin
+      case 3
+        k = 2.0;
+      case 2
+        s = 1e-2; k = 2.0;
+      case 1
+        x = 0; s = 1e-2; k = 2.0;
   end
 
   a = x; ya = f(x); b = a + s; yb = f(a + s);
-
+ 
   % change the direction 
   if yb > ya
       [a, b] = swap(a,b);
