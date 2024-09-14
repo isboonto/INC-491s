@@ -1,7 +1,12 @@
 function [am, bm] = bisection_search(f, a, b, epsilon)
-    if nargin < 4
-        epsilon = 1e-8;
+    switch nargin 
+        case 3
+            espilon = 1e-8
     end
+
+    %if nargin < 4
+    %    epsilon = 1e-8;
+    %end
 
     if a > b
         [a, b] = swap(a,b);     % ensure a < b
