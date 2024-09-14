@@ -17,7 +17,8 @@ figure(1);
 axis([-5, 9, ymin, ymax]); grid;
 hold on
     plot(t, f(t), 'LineWidth',2); 
-    title("$f(x) = (\sin(x) + \sin(\frac{x}{2}))/4$", 'Interpreter','latex','FontSize',14);
+    title("$f(x) = (\sin(x) + \sin(\frac{x}{2}))/4$", ...
+        'Interpreter','latex','FontSize',14);
     xlabel("$x$", 'Interpreter','latex','FontSize',14);
     ylabel("$f(x)$",'Interpreter','latex','FontSize',14);
     % The boundary is very narrow
