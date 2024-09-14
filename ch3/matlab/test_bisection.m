@@ -13,7 +13,7 @@ rowp = size(a7,1);
 
 figure(1);
 %set(gcf,'Position',[0 0 900 400])
-
+% Plot initial function 
 axis([-5, 9, ymin, ymax]); grid;
 hold on
     plot(t, f(t), 'LineWidth',2); 
@@ -24,8 +24,12 @@ hold on
     plot([a0 a0], [ymin, ymax], 'LineWidth',1,'Color','red'); 
     plot([b0 b0], [ymin, ymax], 'LineWidth',1, 'Color','red');
 hold off
+
+% Plot the bisection steps.
 figure(2)
-title("$f(x) = \frac{(\sin(x) + \sin(\frac{x}{2}))}{4}$", 'Interpreter','latex','FontSize',14);
+title("$f(x) = \frac{(\sin(x) + \sin(\frac{x}{2}))}{4}$", ...
+    'Interpreter','latex','FontSize',14);
+
 for i = 1: rowp
     subplot(1, rowp,i)
     axis([-5, 9, ymin, ymax]); grid;
@@ -37,7 +41,8 @@ for i = 1: rowp
     plot([a7(i) a7(i)], [ymin, ymax], 'LineWidth',1,'Color','red'); 
     plot([b7(i) b7(i)], [ymin, ymax], 'LineWidth',1, 'Color','red');
 
-    pgon1 = polyshape([ a7(i) a7(i) b7(i) b7(i) ],[ ymin, ymax, ymax, ymin ], 'Simplify',false);  
+    pgon1 = polyshape([ a7(i) a7(i) b7(i) b7(i) ], ...
+        [ ymin, ymax, ymax, ymin ], 'Simplify',false);  
     plot(intersect(pgon1),'EdgeColor','none','FaceColor','b')
     
 
