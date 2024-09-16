@@ -4,11 +4,11 @@ function [a, c] = bracket_minimumsp(f, x, s, k)
 % k: gamma (weight multiplier) 
 
   switch nargin
-      case 4
-          k = 2.0;
       case 3
-          s = 1e-2; k = 2.0;
+          k = 2.0;
       case 2
+          s = 1e-2; k = 2.0;
+      case 1
           x = 0; s = 1e-2; k = 2.0;
   end
 
