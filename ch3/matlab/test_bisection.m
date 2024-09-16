@@ -44,8 +44,8 @@ for i = 1: rowp
 
     pgon1 = polyshape([ a7(i) a7(i) b7(i) b7(i) ], ...
         [ ymin, ymax, ymax, ymin ], 'Simplify',false);  
-    plot(intersect(pgon1),'EdgeColor','none','FaceColor','b')
-    
+    plot(intersect(pgon1,pgon1),'EdgeColor','none','FaceColor','b')
+
 
     hold off
 end
