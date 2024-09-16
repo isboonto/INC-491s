@@ -2,14 +2,21 @@ function [a, c] = bracket_minimum(f, x, s, k)
 % x: starting point 
 % s: step size 
 % k: gamma (weight multiplier) 
-
-  if nargin < 5
-    k = 2.0;
-  elseif nargin < 4
-    s = 1e-2; k = 2.0;
-  elseif nargin < 3
-    x = 0; s = 1e-2; k = 2.0;
+  switch nargin
+      case 4
+          k = 2.0;
+      case 3
+          s = 1e-2; k = 2.0;
+      case 2
+          x = 0; s = 1e-2; k = 2.0;
   end
+  %if nargin < 5
+  %  k = 2.0;
+  %elseif nargin < 4
+  %  s = 1e-2; k = 2.0;
+  %elseif nargin < 3
+  %  x = 0; s = 1e-2; k = 2.0;
+  %end
    
   a = x; ya = f(x); b = a + s; yb = f(a + s);
 
