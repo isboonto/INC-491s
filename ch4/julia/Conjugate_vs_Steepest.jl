@@ -70,59 +70,17 @@ function line_search(f, x, d)
 	return α
 end
 
-# ╔═╡ 191ab048-6dff-421e-9ee1-cbcb0c4169f7
-md"""
-### Conjugate Gradient Method
-"""
-
-# ╔═╡ a797e874-95e1-479c-8cee-ce3dd968106a
-begin
-	abstract type DescentMethod end
-	
-	mutable struct ConjugateGradientDescent <: DescentMethod
-		d
-		g
-	end
-
-	function init!(M::ConjugateGradientDescent, f, ∇f, x)
-		M.g = ∇f(x)
-		M.d = -M.g
-
-		return M
-	end
-	
-	function step!(M::ConjugateGradientDescent, f, ∇f, x)
-		d, g = M.d, M.g
-		g′ = ∇f(x)		#g\prime <TAB>
-		β = max(0, dot(g′, g′ - g)/dot(g,g)) 	# Polok-Ribiere
-		#β = dot(g′, g′)/dot(g,g)
-		d′ = -g′/norm(g′) + β*d 
-		
-		α = line_search(f, x, d′)
-		x′ = x + α*d′
-		M.d, M.g = d′, g′
-
-		return x′
-	end
-		
-end
-
 # ╔═╡ 607f325f-77ee-4421-ba31-8806e161d2e3
 md"""
 β = $(@bind β PlutoUI.Slider(1:1:20; show_value=true, default=3))
 """
 
-# ╔═╡ dda03848-5c8f-4bf9-9bcc-3fa27cdc0ab2
+# ╔═╡ 81cd9137-945f-4aa9-aa4a-82fdca549b61
 begin
 	# quadratic function
-	f(x) = x[1]^2 + β*x[2]^2 
-	∇f(x) = ForwardDiff.gradient(f,x)
-	pf(x,y) = f([x,y])
-	
+	quadratic(x) = x[1]^2 + β*x[2]^2 
 	# bean function
-	fb(x; a=1, b=0.5) = (a-x[1])^2 + (1-x[2])^2 + (b)*(2x[2] - x[1]^2)^2
-	∇fb(x) = ForwardDiff.gradient(fb,x)		
-	pfb(x,y) = fb([x, y])
+	bean(x; a=1, b=0.5) = (a-x[1])^2 + (1-x[2])^2 + (b)*(2x[2] - x[1]^2)^2
 end
 
 # ╔═╡ a9a572e6-2d50-4d24-8877-81d9647a95c1
@@ -136,6 +94,18 @@ end
 md"""
 ### Objective function
 """
+
+# ╔═╡ e6f40080-d609-47a9-9339-dcf6ae48c8a4
+@bind f Select([quadratic, bean])
+
+# ╔═╡ dda03848-5c8f-4bf9-9bcc-3fa27cdc0ab2
+begin
+	#∇f(x) = ForwardDiff.gradient(f,x)
+	#pf(x,y) = f([x,y])
+	
+	∇f(x) = ForwardDiff.gradient(f,x)		
+	pf(x,y) = f([x, y])
+end
 
 # ╔═╡ 60dd22eb-e428-4d08-804d-90ede695295d
 begin
@@ -155,11 +125,99 @@ begin
 	xxs2 = -5:0.05:3; nothing
 end
 
+# ╔═╡ 8af0fbd0-8cb0-4c25-a1f6-c4cf3d1abab7
+md"""
+### Construct the Gradient Descent
+"""
+
+# ╔═╡ 4ecde5b8-aa69-4197-a06f-dd1bd67c4cba
+md"""
+### Construct the Conjugate Gradient
+"""
+
+# ╔═╡ c9bffae7-d262-4c51-968a-891a2e5be02d
+md"""
+### Gradient Descent
+"""
+
+# ╔═╡ 3b119295-6694-419d-a792-7736ac39f795
+begin
+	abstract type DescentMethod end
+	struct GradientDescent <: DescentMethod
+		α
+	end
+
+	function init!(M::GradientDescent, f, ∇f, x)
+		return M
+	end
+
+	function step!(M::GradientDescent, f, ∇f, x)
+		g = ∇f(x)
+		α =  line_search(f, x, -g)
+		return x - α*g
+	end
+end
+
+# ╔═╡ 191ab048-6dff-421e-9ee1-cbcb0c4169f7
+md"""
+### Conjugate Gradient Method
+"""
+
+# ╔═╡ a797e874-95e1-479c-8cee-ce3dd968106a
+begin
+	mutable struct ConjugateGradientDescent <: DescentMethod
+		d
+		g
+	end
+
+	function init!(M::ConjugateGradientDescent, f, ∇f, x)
+		M.g = ∇f(x)
+		M.d = -M.g
+
+		return M
+	end
+	
+	function step!(M::ConjugateGradientDescent, f, ∇f, x)
+		d, g = M.d, M.g
+		g′ = ∇f(x)		#g\prime <TAB>
+		β = max(0, dot(g′, g′ - g)/dot(g,g)) 	# Polok-Ribiere
+		#β = dot(g′, g′)/dot(g,g)
+		d′ = -g′ + β*d 
+		
+		α = line_search(f, x, d′)
+		x′ = x + α*d′
+		M.d, M.g = d′, g′
+
+		return x′
+	end
+		
+end
+
+# ╔═╡ 45eb692d-11c4-4bbb-9b5c-490f1607538c
+begin
+	xgra = zeros(2, N)
+	xgra[:, 1] = x0
+	xrgra = x0
+
+	Mg = GradientDescent(0) 			# initial α is 0
+	Mg = init!(Mg, f, ∇f, x0)
+
+	# Next Step
+	for i = 2:N
+		xgra[:,i] = step!(Mg, f, ∇f, xgra[:,i-1])
+				
+		if norm(f(xgra[:,i]) .- f(xgra[:,i-1])) < ε_A + ε_R*norm(f(xgra[:,i-1]))
+			global xrgra = xgra[:,1:i]	
+			break;
+		end
+	end
+end
+
 # ╔═╡ 30aae91c-16e5-4840-af61-e6401517599d
 begin
 	# Quadratic with degree 2, the CG can converse in two steps.
 	
-	g0 = ∇fb(x0) 							# Gradient of bean function
+	g0 = ∇f(x0) 							# Gradient of bean function
 	d0 = -g0  								# Steepest descent	
 	xcon = zeros(2, N)						# a vector of solution 
 	xcon[:,1] = x0
@@ -167,13 +225,13 @@ begin
 		
 	# Conjugate Gradient initial step 
 	Mc = ConjugateGradientDescent(g0, d0)
-	Mc = init!(Mc, fb, ∇fb, x0)
+	Mc = init!(Mc, f, ∇f, x0)
 
 	# Next Step
 	for i = 2:N
-		xcon[:,i] = step!(Mc, fb, ∇fb, xcon[:,i-1])	
+		xcon[:,i] = step!(Mc, f, ∇f, xcon[:,i-1])	
 		
-		if norm(fb(xcon[:,i]) .- fb(xcon[:,i-1])) < ε_A + ε_R*norm(fb(xcon[:,i-1]))
+		if norm(f(xcon[:,i]) .- f(xcon[:,i-1])) < ε_A + ε_R*norm(f(xcon[:,i-1]))
 			global xrcon = xcon[:,1:i]	
 			break;
 		end
@@ -183,26 +241,54 @@ end
 
 # ╔═╡ 86974899-c880-46fb-8874-6349f4fd4e57
 begin
-	fig1 = Figure(size=(800,400))
-	bx1 = CairoMakie.Axis(fig1[1,1], xlabel = L"x_1", ylabel = L"x_2", 
+	fig1 = Figure(size=(1000,400))
+	# Steepest Descent
+	bx2 = CairoMakie.Axis(fig1[1,1], xlabel= L"x_1", ylabel = L"x_2",
 		aspect = AxisAspect(1.3))
-	limits!(bx1, -2, 3, -1, 3)
+	limits!(bx2, -2.2, 3, -1.2, 3)
+
+	# Contour and initial point
+	text!(bx2, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
+	scatter!(bx2, x0[1], x0[2], markersize=15, strokewidth=2, strokecolor=:blue, 
+		color=:lightblue)
+	lv1 = -0:5:200 				# level curve
+	contour!(bx2, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.3), linewidth=2)
+	contour!(bx2, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.3), 
+		linewidth=2)
+
+	# Scatter line and the optimal point.
+	Np1 = size(xrgra, 2)
+	scatterlines!(bx2, xrgra[1,1:Np1-1], xrgra[2,1:Np1-1], color=:blue, 
+		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("SD with $(Np1-1) iterations"))
+	scatter!(bx2, xrgra[1,end], xrgra[2,end], markersize=10, color=:red,
+		strokewidth=1, strokecolor=:black)
+	text!(bx2, xrgra[1,end]-0.1, xrgra[2,end]+0.1, text=L"x^\ast", fontsize=22)
+
+	#------------------------------------------------------------------------
+	# Conjugate gradient
+	bx1 = CairoMakie.Axis(fig1[1,2], xlabel = L"x_1", ylabel = L"x_2", 
+		aspect = AxisAspect(1.3))
+	limits!(bx1, -2.2, 3, -1.2, 3)
+
+	# Contour and initial point
 	text!(bx1, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
-	
 	scatter!(bx1, x0[1], x0[2], markersize=15, strokewidth=2, strokecolor=:blue, 
 		color=:lightblue)
 	lv1 = -0:5:200 				# level curve
-	contour!(bx1, xxs1, xxs2, pfb, levels = lv1,  color=(:blue, 0.3), linewidth=2)
-	contour!(bx1, xxs1, xxs2, pfb, levels = [2, 0.3, 0.11], color=(:blue, 0.3), 
+	contour!(bx1, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.3), linewidth=2)
+	contour!(bx1, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.3), 
 		linewidth=2)
 
+	# Scatter line and the optimal point.
 	Np = size(xrcon, 2)
 	scatterlines!(bx1, xrcon[1,1:Np-1], xrcon[2,1:Np-1], color=:blue, 
-		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2)
-	scatter!(bx1, xrcon[1,end], xrcon[2,end], markersize=15, color=:red,
+		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("CG with $(Np-1) iterations"))
+	scatter!(bx1, xrcon[1,end], xrcon[2,end], markersize=10, color=:red,
 		strokewidth=1, strokecolor=:black)
 	text!(bx1, xrcon[1,end]-0.1, xrcon[2,end]+0.1, text=L"x^\ast", fontsize=22)
 	
+	axislegend(bx2, fontsize=18)
+	axislegend(bx1, fontsize=18)
 	fig1
 end
 
@@ -213,13 +299,20 @@ end
 # ╠═f06e8f8f-33c7-4ed8-836d-6de47a88582d
 # ╟─d478eabe-501e-4421-be8b-b7d001dcffe4
 # ╠═455b4dc4-fb60-4a1f-8bf7-bb2fd2f40aca
-# ╟─191ab048-6dff-421e-9ee1-cbcb0c4169f7
-# ╠═a797e874-95e1-479c-8cee-ce3dd968106a
+# ╟─81cd9137-945f-4aa9-aa4a-82fdca549b61
 # ╠═dda03848-5c8f-4bf9-9bcc-3fa27cdc0ab2
 # ╟─607f325f-77ee-4421-ba31-8806e161d2e3
 # ╟─a9a572e6-2d50-4d24-8877-81d9647a95c1
 # ╟─60894cf7-333b-4db5-8735-ea1019ba729f
 # ╟─60dd22eb-e428-4d08-804d-90ede695295d
-# ╟─e3c73ba0-048d-49e4-9d9c-9903873c990e
-# ╟─30aae91c-16e5-4840-af61-e6401517599d
+# ╟─e6f40080-d609-47a9-9339-dcf6ae48c8a4
 # ╠═86974899-c880-46fb-8874-6349f4fd4e57
+# ╠═e3c73ba0-048d-49e4-9d9c-9903873c990e
+# ╟─8af0fbd0-8cb0-4c25-a1f6-c4cf3d1abab7
+# ╠═45eb692d-11c4-4bbb-9b5c-490f1607538c
+# ╟─4ecde5b8-aa69-4197-a06f-dd1bd67c4cba
+# ╠═30aae91c-16e5-4840-af61-e6401517599d
+# ╟─c9bffae7-d262-4c51-968a-891a2e5be02d
+# ╠═3b119295-6694-419d-a792-7736ac39f795
+# ╟─191ab048-6dff-421e-9ee1-cbcb0c4169f7
+# ╠═a797e874-95e1-479c-8cee-ce3dd968106a
