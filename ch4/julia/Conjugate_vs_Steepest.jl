@@ -78,9 +78,9 @@ md"""
 # ╔═╡ 81cd9137-945f-4aa9-aa4a-82fdca549b61
 begin
 	# quadratic function
-	quadratic(x) = x[1]^2 + β*x[2]^2 
+	quadratic(x) = x[1]^2 + β*x[2]^2;
 	# bean function
-	bean(x; a=1, b=0.5) = (a-x[1])^2 + (1-x[2])^2 + (b)*(2x[2] - x[1]^2)^2
+	bean(x; a=1, b=0.5) = (a-x[1])^2 + (1-x[2])^2 + (b)*(2x[2] - x[1]^2)^2; nothing
 end
 
 # ╔═╡ a9a572e6-2d50-4d24-8877-81d9647a95c1
@@ -104,7 +104,7 @@ begin
 	#pf(x,y) = f([x,y])
 	
 	∇f(x) = ForwardDiff.gradient(f,x)		
-	pf(x,y) = f([x, y])
+	pf(x,y) = f([x, y]); nothing
 end
 
 # ╔═╡ 60dd22eb-e428-4d08-804d-90ede695295d
@@ -119,10 +119,10 @@ begin
 	# Commond use variable
 	N = 500 			# maximum iterations
 	x0 = [x01, x02] 	# initial point
-	ε_G = 1e-10; ε_A = 1e-10; ε_R = 1e-10
+	ε_G = 1e-10; ε_A = 1e-4; ε_R = 1e-10
 	# Mesh Grid
-	xxs1 = -5:0.05:3;
-	xxs2 = -5:0.05:3; nothing
+	xxs1 = -5:0.05:4;
+	xxs2 = -5:0.05:4; nothing
 end
 
 # ╔═╡ 8af0fbd0-8cb0-4c25-a1f6-c4cf3d1abab7
@@ -143,7 +143,7 @@ md"""
 # ╔═╡ 3b119295-6694-419d-a792-7736ac39f795
 begin
 	abstract type DescentMethod end
-	struct GradientDescent <: DescentMethod
+	mutable struct GradientDescent <: DescentMethod
 		α
 	end
 
@@ -206,7 +206,7 @@ begin
 	for i = 2:N
 		xgra[:,i] = step!(Mg, f, ∇f, xgra[:,i-1])
 				
-		if norm(f(xgra[:,i]) .- f(xgra[:,i-1])) < ε_A + ε_R*norm(f(xgra[:,i-1]))
+		if norm(f(xgra[:,i]) .- f(xgra[:,i-1])) < ε_A 
 			global xrgra = xgra[:,1:i]	
 			break;
 		end
@@ -218,7 +218,7 @@ begin
 	# Quadratic with degree 2, the CG can converse in two steps.
 	
 	g0 = ∇f(x0) 							# Gradient of bean function
-	d0 = -g0  								# Steepest descent	
+	d0 = g0  								# Steepest descent	
 	xcon = zeros(2, N)						# a vector of solution 
 	xcon[:,1] = x0
 	xrcon = x0
@@ -231,7 +231,7 @@ begin
 	for i = 2:N
 		xcon[:,i] = step!(Mc, f, ∇f, xcon[:,i-1])	
 		
-		if norm(f(xcon[:,i]) .- f(xcon[:,i-1])) < ε_A + ε_R*norm(f(xcon[:,i-1]))
+		if norm(f(xcon[:,i]) .- f(xcon[:,i-1])) < ε_A 
 			global xrcon = xcon[:,1:i]	
 			break;
 		end
@@ -242,10 +242,11 @@ end
 # ╔═╡ 86974899-c880-46fb-8874-6349f4fd4e57
 begin
 	fig1 = Figure(size=(1000,400))
+	#--------------------------------------------------------------------------
 	# Steepest Descent
 	bx2 = CairoMakie.Axis(fig1[1,1], xlabel= L"x_1", ylabel = L"x_2",
 		aspect = AxisAspect(1.3))
-	limits!(bx2, -2.2, 3, -1.2, 3)
+	limits!(bx2, -2.2, 3.2, -1.2, 3.2)
 
 	# Contour and initial point
 	text!(bx2, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
@@ -268,7 +269,7 @@ begin
 	# Conjugate gradient
 	bx1 = CairoMakie.Axis(fig1[1,2], xlabel = L"x_1", ylabel = L"x_2", 
 		aspect = AxisAspect(1.3))
-	limits!(bx1, -2.2, 3, -1.2, 3)
+	limits!(bx1, -2.2, 3.2, -1.2, 3.2)
 
 	# Contour and initial point
 	text!(bx1, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
@@ -282,7 +283,7 @@ begin
 	# Scatter line and the optimal point.
 	Np = size(xrcon, 2)
 	scatterlines!(bx1, xrcon[1,1:Np-1], xrcon[2,1:Np-1], color=:blue, 
-		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("CG with $(Np-1) iterations"))
+		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("CG with $(Np-2) iterations"))
 	scatter!(bx1, xrcon[1,end], xrcon[2,end], markersize=10, color=:red,
 		strokewidth=1, strokecolor=:black)
 	text!(bx1, xrcon[1,end]-0.1, xrcon[2,end]+0.1, text=L"x^\ast", fontsize=22)
@@ -299,9 +300,9 @@ end
 # ╠═f06e8f8f-33c7-4ed8-836d-6de47a88582d
 # ╟─d478eabe-501e-4421-be8b-b7d001dcffe4
 # ╠═455b4dc4-fb60-4a1f-8bf7-bb2fd2f40aca
-# ╟─81cd9137-945f-4aa9-aa4a-82fdca549b61
+# ╠═81cd9137-945f-4aa9-aa4a-82fdca549b61
 # ╠═dda03848-5c8f-4bf9-9bcc-3fa27cdc0ab2
-# ╟─607f325f-77ee-4421-ba31-8806e161d2e3
+# ╠═607f325f-77ee-4421-ba31-8806e161d2e3
 # ╟─a9a572e6-2d50-4d24-8877-81d9647a95c1
 # ╟─60894cf7-333b-4db5-8735-ea1019ba729f
 # ╟─60dd22eb-e428-4d08-804d-90ede695295d
