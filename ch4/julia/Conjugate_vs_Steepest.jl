@@ -55,13 +55,15 @@ end
 
 # ╔═╡ 607f325f-77ee-4421-ba31-8806e161d2e3
 md"""
-β = $(@bind β PlutoUI.Slider(1:1:20; show_value=true, default=3))
+Quadratic function:
+
+vertical axis β₁ = $(@bind β₁ PlutoUI.Slider(1:1:20; show_value=true, default=3)), horizontal β₂  $(@bind β₂ PlutoUI.Slider(1:1:20; show_value=true, default=3))
 """
 
 # ╔═╡ 81cd9137-945f-4aa9-aa4a-82fdca549b61
 begin
 	# quadratic function
-	Quadratic(x) = x[1]^2 + β*x[2]^2;
+	Quadratic(x) = β₁*x[1]^2 + β₂*x[2]^2;
 	
 	# bean function
 	Bean(x; a=1, b=0.5) = (a-x[1])^2 + (1-x[2])^2 + (b)*(2x[2] - x[1]^2)^2; nothing
@@ -73,7 +75,7 @@ end
 # ╔═╡ a9a572e6-2d50-4d24-8877-81d9647a95c1
 begin
 	md"""
-	x = $(@bind x01 PlutoUI.Slider(-2:0.1:2, show_value=true, default = -1.2)), $(@bind x02 PlutoUI.Slider(-1:0.1:3, show_value=true, default=2))
+	x = $(@bind x01 PlutoUI.Slider(-2:0.1:2, show_value=true, default = -1.2)), $(@bind x02 PlutoUI.Slider(-2:0.1:2, show_value=true, default=2))
 	"""
 end
 
@@ -300,22 +302,22 @@ begin
 	#--------------------------------------------------------------------------
 	# Steepest Descent
 	bx2 = CairoMakie.Axis(fig1[1,1], xlabel= L"x_1", ylabel = L"x_2",
-		aspect = AxisAspect(1.3))
-	limits!(bx2, -2.2, 3.2, -1.2, 3.2)
+		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.05))
+	limits!(bx2, -2.2, 2.2, -2.2, 3.2)
 
 	# Contour and initial point
 	text!(bx2, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
 	scatter!(bx2, x0[1], x0[2], markersize=15, strokewidth=2, strokecolor=:blue, 
 		color=:lightblue)
 	lv1 = -0:5:200 				# level curve
-	contour!(bx2, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.3), linewidth=2)
-	contour!(bx2, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.3), 
+	contour!(bx2, xxs1, xxs2, pf, levels = lv1, color=(:blue, 0.4), linewidth=2)
+	contour!(bx2, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
 		linewidth=2)
 
 	# Scatter line and the optimal point.
 	Np1 = size(xrgra, 2)
 	scatterlines!(bx2, xrgra[1,1:Np1-1], xrgra[2,1:Np1-1], color=:blue, 
-		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("SD with $(Np1-1) iterations"))
+		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("SD with $(Np1-2) iterations"))
 	scatter!(bx2, xrgra[1,end], xrgra[2,end], markersize=10, color=:red,
 		strokewidth=1, strokecolor=:black)
 	text!(bx2, xrgra[1,end]-0.1, xrgra[2,end]+0.1, text=L"x^\ast", fontsize=22)
@@ -323,22 +325,22 @@ begin
 	#------------------------------------------------------------------------
 	# Conjugate gradient
 	bx1 = CairoMakie.Axis(fig1[1,2], xlabel = L"x_1", ylabel = L"x_2", 
-		aspect = AxisAspect(1.3))
-	limits!(bx1, -2.2, 3.2, -1.2, 3.2)
+		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.05))
+	limits!(bx1, -2.2, 2.2, -2.2, 3.2)
 
 	# Contour and initial point
 	text!(bx1, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
 	scatter!(bx1, x0[1], x0[2], markersize=15, strokewidth=2, strokecolor=:blue, 
 		color=:lightblue)
 	lv1 = -0:5:200 				# level curve
-	contour!(bx1, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.3), linewidth=2)
-	contour!(bx1, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.3), 
+	contour!(bx1, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
+	contour!(bx1, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
 		linewidth=2)
 
 	# Scatter line and the optimal point.
 	Np = size(xrcon, 2)
 	scatterlines!(bx1, xrcon[1,1:Np-1], xrcon[2,1:Np-1], color=:blue, 
-		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("CG with $(Np-1) iterations"))
+		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("CG with $(Np-2) iterations"))
 	scatter!(bx1, xrcon[1,end], xrcon[2,end], markersize=10, color=:red,
 		strokewidth=1, strokecolor=:black)
 	text!(bx1, xrcon[1,end]-0.1, xrcon[2,end]+0.1, text=L"x^\ast", fontsize=22)
@@ -355,7 +357,7 @@ end
 # ╠═f06e8f8f-33c7-4ed8-836d-6de47a88582d
 # ╠═81cd9137-945f-4aa9-aa4a-82fdca549b61
 # ╠═dda03848-5c8f-4bf9-9bcc-3fa27cdc0ab2
-# ╠═607f325f-77ee-4421-ba31-8806e161d2e3
+# ╟─607f325f-77ee-4421-ba31-8806e161d2e3
 # ╟─a9a572e6-2d50-4d24-8877-81d9647a95c1
 # ╟─60894cf7-333b-4db5-8735-ea1019ba729f
 # ╟─60dd22eb-e428-4d08-804d-90ede695295d
