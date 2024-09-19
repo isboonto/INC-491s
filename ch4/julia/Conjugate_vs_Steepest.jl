@@ -167,7 +167,7 @@ begin
 	# Commond use variable
 	N = 500 			# maximum iterations
 	x0 = [x01, x02] 	# initial point
-	ε_G = 1e-14; ε_A = 1e-14; ε_R = 1e-14
+	ε_G = 1e-4; ε_A = 1e-14; ε_R = 1e-14
 	# Mesh Grid
 	xxs1 = -5:0.05:4;
 	xxs2 = -5:0.05:4; nothing
@@ -266,7 +266,8 @@ begin
 	for i = 2:N
 		xgra[:,i] = step!(Mg, f, ∇f, xgra[:,i-1])
 				
-		if norm(f(xgra[:,i]) .- f(xgra[:,i-1])) <= ε_A + ε_R*f(xcon[:,i-1])
+		#if norm(f(xgra[:,i]) .- f(xgra[:,i-1])) <= ε_A + ε_R*f(xcon[:,i-1])
+		if norm(∇f(xgra[:,i])) <= ε_G
 			global xrgra = xgra[:,1:i]	
 			break;
 		else
@@ -287,7 +288,8 @@ begin
 	for i = 2:N
 		xcon[:,i] = step!(Mc, f, ∇f, xcon[:,i-1])	
 		
-		if norm(f(xcon[:,i]) .- f(xcon[:,i-1])) < ε_A + ε_R*f(xcon[:,i])
+		#if norm(f(xcon[:,i]) .- f(xcon[:,i-1])) < ε_A + ε_R*f(xcon[:,i])
+		if norm(∇f(xcon[:,i])) <= ε_G	
 			global xrcon = xcon[:,1:i]	
 			break;
 		else
