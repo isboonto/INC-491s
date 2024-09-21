@@ -220,8 +220,20 @@ begin
 	xnew = zeros(2, N)						# a vector of solution 
 	xnew[:,1] = x0; 
 	xnewl = zeros(2, N)
-	xnewl[:,1] = x0; nothing
+	xnewl[:,1] = x0; 
+	xnewapl = zeros(2, N)
+	xnewapl[:,1] = x0; nothing
 end
+
+# ╔═╡ f2cf1870-cdc2-40b2-8229-b1f47a552508
+md"""
+#### Newton's method with exact linesearch
+"""
+
+# ╔═╡ 30c7a4ba-fc91-4890-8316-91398f37e0a1
+md"""
+#### Newton's method with approximate linesearch
+"""
 
 # ╔═╡ 20476b16-8936-4c0f-96fa-b4ed72c7cb4e
 md"""
@@ -328,6 +340,17 @@ begin
 
 		return x′
 	end
+
+	function step_apls!(M::Newton, f, ∇f, ∇2f, x)
+		g, H = M.g, M.H
+		s = -H\g
+		α = backtracking_line_search(f, ∇f, x, s, 1.0; p=0.4, β=1e-4)
+		x′ = x + α*s
+		M.g = ∇f(x′)
+		M.H = ∇2f(x′)
+
+		return x′
+	end
 	
 end
 
@@ -380,7 +403,7 @@ begin
 	#--------------------------------------------------------------------------
 	# Steepest Descent
 	bx2 = CairoMakie.Axis(fig1[1,1], xlabel= L"x_1", ylabel = L"x_2",
-		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.05))
+		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
 	limits!(bx2, -2.2, 2.2, -2.2, 3.2)
 
 	# Contour and initial point
@@ -403,7 +426,7 @@ begin
 	#------------------------------------------------------------------------
 	# Conjugate gradient
 	bx1 = CairoMakie.Axis(fig1[1,2], xlabel = L"x_1", ylabel = L"x_2", 
-		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.05))
+		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
 	limits!(bx1, -2.2, 2.2, -2.2, 3.2)
 
 	# Contour and initial point
@@ -467,11 +490,33 @@ begin
 	
 end
 
+# ╔═╡ 3e2cf0b8-94d7-47c6-b843-badc161df75f
+begin
+	xrnewapl = [];
+	# Newton initial step
+	Mnapl = Newton(gnew0, Hnew0)
+	Mnapl = init!(Mnapl, f, ∇f, ∇2f, x0)
+
+	# Next Step
+	# approximate line search sometime is quite bad. 
+	for i = 2:N
+		xnewapl[:,i] = step_apls!(Mnapl, f, ∇f, ∇2f, xnewapl[:,i-1])
+
+		if norm(∇f(xnewapl[:,i])) <= ε_G
+			global xrnewapl = xnewapl[:,1:i]
+			break;
+		else
+			global xrnewapl = xnewapl[:, 1:i-1]
+		end
+	end
+	
+end
+
 # ╔═╡ d141a0dd-460b-43b0-9dbe-e80a1ee6a7b0
 begin
 	# Newton's method without linesearch
 	bx3 = CairoMakie.Axis(fig1[2,1], xlabel = L"x_1", ylabel = L"x_2", 
-		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.05))
+		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
 	limits!(bx3, -2.2, 2.2, -2.2, 3.2)
 
 	# Contour and initial point
@@ -495,7 +540,7 @@ begin
 	#-----------------------------------------------------------------
 	# Newton's with linesearch
 	bx4 = CairoMakie.Axis(fig1[2,2], xlabel = L"x_1", ylabel = L"x_2", 
-		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.05))
+		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
 	limits!(bx4, -2.2, 2.2, -2.2, 3.2)
 	
 	# Contour and initial point
@@ -509,9 +554,16 @@ begin
 	
 	# Scatter line and the optimal point
 	Nnl = size(xrnewl, 2)
-
+	Nnapl = size(xrnewapl, 2)
+	
+	# exact line search
 	scatterlines!(bx4, xrnewl[1,1:Nnl-1], xrnewl[2,1:Nnl-1], color=:blue, 
-		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("Newton+LS with $(Nnl-1) iterations"))
+		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("Newton+ex LS with $(Nnl-1) iterations"))
+	
+	# approximate line search
+	scatterlines!(bx4, xrnewapl[1,1:Nnapl-1], xrnewapl[2,1:Nnapl-1], color=:green, 
+		markercolor=:lightgreen, markersize=15, strokewidth = 1, strokecolor=:green, linewidth=2, label=("Newton+app LS with $(Nnapl-1) iterations"))
+	
 	scatter!(bx4, xrnewl[1,end], xrnewl[2,end], markersize=10, color=:red,
 		strokewidth=1, strokecolor=:black)
 	text!(bx4, xrnewl[1,end]-0.1, xrnewl[2,end]+0.1, text=L"x^\ast", fontsize=22)
@@ -562,7 +614,10 @@ end
 # ╟─e927823d-f10b-491a-a7ec-87e2b2dbcc4a
 # ╠═bf6c38b9-eda2-4ae0-8e5e-e1578b32666c
 # ╠═efc966ba-6fee-48a9-ba64-4aff75ea6bc5
+# ╟─f2cf1870-cdc2-40b2-8229-b1f47a552508
 # ╠═f57ba092-5e70-44cb-9852-faeee9a48cc2
+# ╟─30c7a4ba-fc91-4890-8316-91398f37e0a1
+# ╠═3e2cf0b8-94d7-47c6-b843-badc161df75f
 # ╟─20476b16-8936-4c0f-96fa-b4ed72c7cb4e
 # ╠═9eb3739c-37a1-4063-9493-f4fa73fc8294
 # ╟─658984bb-5e9b-4589-9329-1a703ab3cca1
