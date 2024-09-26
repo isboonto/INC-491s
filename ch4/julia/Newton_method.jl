@@ -117,6 +117,11 @@ md"""
 ### Newton's method plot
 """
 
+# ╔═╡ dc6d5c9d-95b1-4fac-a73d-fe70ab114ea5
+md"""
+### Newton's Method vs Quasi-Newton's Method
+"""
+
 # ╔═╡ fe1d59f0-2283-4912-a13c-f45dd42bcac8
 function bisection(f, a₀, b₀, ϵ)
 
@@ -219,13 +224,19 @@ md"""
 # ╔═╡ bf6c38b9-eda2-4ae0-8e5e-e1578b32666c
 begin
 	gnew0 = ∇f(x0) 							# Gradient of bean function
-	Hnew0 = ∇2f(x0)  								# Steepest descent	
+	Hnew0 = ∇2f(x0)  								# Steepest descent
+	
 	xnew = zeros(2, N)						# a vector of solution 
 	xnew[:,1] = x0; 
+	
 	xnewl = zeros(2, N)
 	xnewl[:,1] = x0; 
+	
 	xnewapl = zeros(2, N)
-	xnewapl[:,1] = x0; nothing
+	xnewapl[:,1] = x0; 
+	
+	xdfp = zeros(2, N)
+	xdfp[:,1] = x0; nothing
 end
 
 # ╔═╡ f2cf1870-cdc2-40b2-8229-b1f47a552508
@@ -236,6 +247,11 @@ md"""
 # ╔═╡ 30c7a4ba-fc91-4890-8316-91398f37e0a1
 md"""
 #### Newton's method with approximate linesearch
+"""
+
+# ╔═╡ b28af950-a1cc-4807-82e8-c6ae6aec1825
+md"""
+#### Construct the DFP
 """
 
 # ╔═╡ 20476b16-8936-4c0f-96fa-b4ed72c7cb4e
@@ -355,6 +371,56 @@ begin
 		return x′
 	end
 	
+end
+
+# ╔═╡ 24b4c32e-4f9d-46da-9013-80a7df3cc123
+begin
+	# algorithm 6.3 The devidon-Fletcher-Powell descent method
+	mutable struct DFP <: DescentMethod
+		Q
+	end
+	function init!(M::DFP, f, ∇f, x)
+		m = length(x)
+		M.Q = Matrix(1.0I, m, m)
+		return M
+	end
+	
+	function step!(M::DFP, f, ∇f, x)
+		Q, g = M.Q, ∇f(x)
+		
+		α = line_search(f, x, -Q*g)
+		x′ = x - α*Q*g
+	
+		g′ = ∇f(x′)
+		s = x′ - x
+		y = g′ - g
+		Q[:] = Q - Q*s*s'*Q/(y'*Q*y) + s*s'/(s'*y)
+		
+		return x′
+	end
+end
+
+# ╔═╡ 7b1e85c6-008f-44a6-896d-2860a281d2ee
+begin
+	mutable struct BFGS <: DescentMethod
+		Q
+	end
+	function init!(M::BFGS, f, ∇f, x)
+		m = length(x)
+		M.Q = Matrix(1.0I, m, m)
+		return M
+	end
+	function step!(M::BFGS, f, ∇f, x)
+		Q, g = M.Q, ∇f(x)
+		α = line_search(f, x, -Q*g)
+		x′ = x - α*Q*g
+		g′ = ∇f(x′)
+		s = x′ - x
+		y = g′ - g
+		Q[:] = Q - (s*y'*Q + Q*y*s')/(s'*y) + 
+				(1 + (y'*Q*y)/(s'*y))[1]*(s*s')/(s'*y)
+		return x′
+	end
 end
 
 # ╔═╡ b0f44627-20ba-4758-b089-5c02dd33fd38
@@ -534,11 +600,12 @@ begin
 	# Scatter line and the optimal point
 	Nn = size(xrnew, 2)
 	
+	
 	scatterlines!(bx3, xrnew[1,1:Nn], xrnew[2,1:Nn], color=:blue, 
 		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("Newton with $(Nn-1) iterations"))
 	scatter!(bx3, xrnew[1,end], xrnew[2,end], markersize=10, color=:red,
 		strokewidth=1, strokecolor=:black)
-	text!(bx3, xrnew[1,end]-0.1, xrnew[2,end]+0.1, text=L"x^\ast", fontsize=22)
+	
 
 	#-----------------------------------------------------------------
 	# Newton's with linesearch
@@ -585,6 +652,121 @@ begin
 	fig1
 end
 
+# ╔═╡ 02cf98fa-3dcb-4225-a653-07d746d41b6c
+begin
+	xrdfp = [];
+	Q0 = 1.0I
+	# DFP
+	Mdfp = DFP(Q0)
+	Mdfp = init!(Mdfp, f, ∇f, x0)
+
+	# Next Stpe
+	for i = 2:N
+		xdfp[:,i] = step!(Mdfp, f, ∇f, xdfp[:,i-1])
+
+		if norm(∇f(xdfp[:,i])) <= ε_G
+			global xrdfp = xdfp[:,1:i]
+			break;
+		else
+			global xrdfp = xdfp[:,1:i-1]
+		end
+	end
+end
+
+# ╔═╡ 8c5f0bae-b94f-458b-b9c0-432f8efecc4a
+begin
+	fig2 = Figure(size=(1000,800))
+	empty!(fig2)
+	# Newton's method without linesearch
+	bx5 = CairoMakie.Axis(fig2[1,1], xlabel = L"x_1", ylabel = L"x_2", 
+		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
+	limits!(bx5, -2.2, 2.2, -2.2, 3.2)
+
+	# Contour and initial point
+	text!(bx5, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
+	scatter!(bx5, x0[1], x0[2], markersize=15, strokewidth=2, strokecolor=:blue, 
+		color=:lightblue)
+	
+	contour!(bx5, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
+	contour!(bx5, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+		linewidth=2)
+	
+	
+	
+	scatterlines!(bx5, xrnew[1,1:Nn], xrnew[2,1:Nn], color=:blue, 
+		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("Newton with $(Nn-1) iterations"))
+	scatter!(bx5, xrnew[1,end], xrnew[2,end], markersize=10, color=:red,
+		strokewidth=1, strokecolor=:black)
+	
+
+	#-----------------------------------------------------------------
+	# Newton's with linesearch
+	bx6 = CairoMakie.Axis(fig2[1,2], xlabel = L"x_1", ylabel = L"x_2", 
+		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
+	limits!(bx6, -2.2, 2.2, -2.2, 3.2)
+	
+	# Contour and initial point
+	text!(bx6, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
+	scatter!(bx6, x0[1], x0[2], markersize=15, strokewidth=2, strokecolor=:blue, 
+		color=:lightblue)
+	
+	contour!(bx6, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
+	contour!(bx6, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+		linewidth=2)
+	
+		
+	# exact line search
+	scatterlines!(bx6, xrnewl[1,1:Nnl-1], xrnewl[2,1:Nnl-1], color=:blue, 
+		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("Newton+ex LS with $(Nnl-1) iterations"))
+	
+	# approximate line search
+	scatterlines!(bx6, xrnewapl[1,1:Nnapl-1], xrnewapl[2,1:Nnapl-1], color=:green, 
+		markercolor=:lightgreen, markersize=15, strokewidth = 1, strokecolor=:green, linewidth=2, label=("Newton+app LS with $(Nnapl-1) iterations"))
+	
+	scatter!(bx6, xrnewl[1,end], xrnewl[2,end], markersize=10, color=:red,
+		strokewidth=1, strokecolor=:black)
+	text!(bx6, xrnewl[1,end]-0.1, xrnewl[2,end]+0.1, text=L"x^\ast", fontsize=22)
+
+	#-----------------------------------------------------------------
+	# BFP
+	bx7 = CairoMakie.Axis(fig2[2,1], xlabel = L"x_1", ylabel = L"x_2", 
+		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
+	limits!(bx7, -2.2, 2.2, -2.2, 3.2)
+
+	# Contour and initial point
+	text!(bx7, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
+	scatter!(bx7, x0[1], x0[2], markersize=15, strokewidth=2, strokecolor=:blue, 
+		color=:lightblue)
+	
+	contour!(bx7, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
+	contour!(bx7, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+		linewidth=2)
+
+	Ndfp = size(xrdfp, 2)
+	#Nnapl = size(xrnewapl, 2)
+
+	# BFP
+	scatterlines!(bx7, xrdfp[1,1:Ndfp-1], xrdfp[2,1:Ndfp-1], color=:blue, 
+		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("DFP with $(Ndfp-1) iterations"))
+	
+	scatter!(bx7, xrdfp[1,end], xrdfp[2,end], markersize=10, color=:red,
+		strokewidth=1, strokecolor=:black)
+	text!(bx7, xrdfp[1,end]-0.1, xrdfp[2,end]+0.1, text=L"x^\ast", fontsize=22)
+	
+	
+end
+
+# ╔═╡ 303ba852-0430-4d42-809a-46ccfdf5fe0c
+begin
+	
+	axislegend(bx5, fontsize=18)
+	axislegend(bx6, fontsize=18)
+	axislegend(bx7, fontsize=18)
+	#axislegend(bx4, fontsize=18)
+
+	fig2
+end
+
 # ╔═╡ Cell order:
 # ╠═76a55074-772f-11ef-02f5-4da9c17e00ed
 # ╠═0e935cc5-e81e-4cfe-9e2d-c7edd47a2d5c
@@ -597,12 +779,15 @@ end
 # ╟─9c9328e2-78a4-4361-a18c-6b8dec5de817
 # ╟─944e78b3-29be-4b73-9bf4-250996963029
 # ╟─d3d14f77-86a1-4060-814c-aa27b28e3981
-# ╠═e7079934-b250-4846-827f-feee8d1ac2c6
+# ╟─e7079934-b250-4846-827f-feee8d1ac2c6
 # ╠═08670520-306a-4f1d-8f82-79e094f15da3
 # ╟─12a097ad-b16a-4f78-aaf6-d416099a5d31
-# ╠═3774f258-6fdb-4a1a-acef-efba80f937ee
+# ╟─3774f258-6fdb-4a1a-acef-efba80f937ee
 # ╟─054a40ed-263a-4b9a-a8e2-2849268aa02c
-# ╠═d141a0dd-460b-43b0-9dbe-e80a1ee6a7b0
+# ╟─d141a0dd-460b-43b0-9dbe-e80a1ee6a7b0
+# ╟─dc6d5c9d-95b1-4fac-a73d-fe70ab114ea5
+# ╠═303ba852-0430-4d42-809a-46ccfdf5fe0c
+# ╠═8c5f0bae-b94f-458b-b9c0-432f8efecc4a
 # ╠═fe1d59f0-2283-4912-a13c-f45dd42bcac8
 # ╟─9a46e083-89a9-40f0-88e2-2999aa9e54c1
 # ╠═f500ed5b-d066-49db-8ac7-52fd22a3e62f
@@ -622,6 +807,8 @@ end
 # ╠═f57ba092-5e70-44cb-9852-faeee9a48cc2
 # ╟─30c7a4ba-fc91-4890-8316-91398f37e0a1
 # ╠═3e2cf0b8-94d7-47c6-b843-badc161df75f
+# ╟─b28af950-a1cc-4807-82e8-c6ae6aec1825
+# ╠═02cf98fa-3dcb-4225-a653-07d746d41b6c
 # ╟─20476b16-8936-4c0f-96fa-b4ed72c7cb4e
 # ╠═9eb3739c-37a1-4063-9493-f4fa73fc8294
 # ╟─658984bb-5e9b-4589-9329-1a703ab3cca1
@@ -630,3 +817,5 @@ end
 # ╠═1a4ddc9c-317c-4e0c-8b04-3cf83978ef1b
 # ╟─4915e1ae-ac36-4f69-bd13-de21d5c89088
 # ╠═3f42e662-db76-474b-90c4-fe8e5c252890
+# ╠═24b4c32e-4f9d-46da-9013-80a7df3cc123
+# ╠═7b1e85c6-008f-44a6-896d-2860a281d2ee
