@@ -104,6 +104,9 @@ begin
 	ft = latexstring("f(x_1, x_2) = $(pf(x₁, x₂))")
 end
 
+# ╔═╡ 08670520-306a-4f1d-8f82-79e094f15da3
+#save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/newton1_2024.pdf", fig1)
+
 # ╔═╡ 12a097ad-b16a-4f78-aaf6-d416099a5d31
 md"""
 ### Steepest Descent Plot
@@ -595,6 +598,7 @@ end
 # ╟─944e78b3-29be-4b73-9bf4-250996963029
 # ╟─d3d14f77-86a1-4060-814c-aa27b28e3981
 # ╠═e7079934-b250-4846-827f-feee8d1ac2c6
+# ╠═08670520-306a-4f1d-8f82-79e094f15da3
 # ╟─12a097ad-b16a-4f78-aaf6-d416099a5d31
 # ╠═3774f258-6fdb-4a1a-acef-efba80f937ee
 # ╟─054a40ed-263a-4b9a-a8e2-2849268aa02c
