@@ -49,12 +49,12 @@ begin
 	@printf("----------------------------------------------\n")
 	@printf(" i      xₖ            pₖ             fk\n")
 	@printf("----------------------------------------------\n")
-	@printf("%2.0d    % 1.4f      % 1.4f       % 1.4f\n", 0, round(x′, digits=4),
+	@printf("%2.0d    % 1.4f      % 1.4f       % 02.4f\n", 0, round(x′, digits=4),
 		-∇2f(x′)/∇f(x′), f(x′))
 	for i = 1:n
 		p = -∇2f(x′)\∇f(x′)
 		global x′ = x′ + p
-		@printf("%2.0d    % 1.4f      % 1.4f        % 1.4f\n", i, 
+		@printf("%2.0d    % 1.4f      % 1.4f        % 02.4f\n", i, 
 			round(x′, digits=4),	round(p, digits=4), f(x′))
 	end
 end
@@ -68,13 +68,13 @@ function standard_Newton1(f, ∇f, n, x_range, x0, xmin=0, xmax=5, ymin=-10, yma
 	#∇f = x -> ForwardDiff.derivative(f,x)
 	#∇2f = x -> ForwardDiff.derivative(∇f, x)
 
-	fig2 = Figure(size = (800,400))
+	fig2 = Figure(size = (800,500))
 	empty!(fig2)
 	
 	
 	bx = Axis(fig2[1,1], xlabel = L"x", aspect = AxisAspect(1.5), 
 		xlabelsize=22, ylabelsize=22)
-	limits!(bx, xmin-0.2, xmax+0.2 ,ymin-0.2, ymax+0.2)
+	limits!(bx, xmin, xmax+0.2 ,ymin-0.2, ymax+0.2)
 
 	lines!(bx, x_range, ∇f, linewidth=3, color=:red, label=L"\nabla f(x)")
 	lines!(bx, x_range, f, linewidth=3, color=:blue, label=L"f(x)")
@@ -113,7 +113,7 @@ end
 # ╔═╡ Cell order:
 # ╠═c98bf95e-7ae6-11ef-1efb-ed52cfaa1bce
 # ╠═2317a938-c119-414d-8773-20acf9d4c5e8
-# ╠═e5d25072-0c4e-4715-bddb-62ecb3138279
+# ╟─e5d25072-0c4e-4715-bddb-62ecb3138279
 # ╟─4cde65b4-075f-48bf-8c06-db750468e562
 # ╟─73ff8404-fcd3-4d4c-8287-6879083f2b02
 # ╠═9a5808c1-68c0-407d-998f-ba44778603d2
