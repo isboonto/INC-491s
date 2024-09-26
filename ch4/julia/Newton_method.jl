@@ -72,17 +72,30 @@ begin
 	Rosenbrock(x; a=1, b=0.5) = (a - x[1])^2 + b*(x[2] -x[1]^2)^2;
 end
 
+# ╔═╡ 9c9328e2-78a4-4361-a18c-6b8dec5de817
+md"""
+### Objective function
+"""
+
+# ╔═╡ 08670520-306a-4f1d-8f82-79e094f15da3
+#save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/newton1_2024.pdf", fig1)
+
+# ╔═╡ 12a097ad-b16a-4f78-aaf6-d416099a5d31
+md"""
+### Steepest Descent Plot
+"""
+
+# ╔═╡ 054a40ed-263a-4b9a-a8e2-2849268aa02c
+md"""
+### Newton's method plot
+"""
+
 # ╔═╡ e105054f-b798-4b3e-85fe-0fafd4519ffe
 begin
 	md"""
 	x = $(@bind x01 PlutoUI.Slider(-2:0.1:2, show_value=true, default = -1.2)), $(@bind x02 PlutoUI.Slider(-2:0.1:2, show_value=true, default=2))
 	"""
 end
-
-# ╔═╡ 9c9328e2-78a4-4361-a18c-6b8dec5de817
-md"""
-### Objective function
-"""
 
 # ╔═╡ d3d14f77-86a1-4060-814c-aa27b28e3981
 @bind f Select([Quadratic, Bean, Rosenbrock])
@@ -103,19 +116,6 @@ begin
 
 	ft = latexstring("f(x_1, x_2) = $(pf(x₁, x₂))")
 end
-
-# ╔═╡ 08670520-306a-4f1d-8f82-79e094f15da3
-#save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/newton1_2024.pdf", fig1)
-
-# ╔═╡ 12a097ad-b16a-4f78-aaf6-d416099a5d31
-md"""
-### Steepest Descent Plot
-"""
-
-# ╔═╡ 054a40ed-263a-4b9a-a8e2-2849268aa02c
-md"""
-### Newton's method plot
-"""
 
 # ╔═╡ dc6d5c9d-95b1-4fac-a73d-fe70ab114ea5
 md"""
@@ -236,7 +236,17 @@ begin
 	xnewapl[:,1] = x0; 
 	
 	xdfp = zeros(2, N)
-	xdfp[:,1] = x0; nothing
+	xdfp[:,1] = x0; 
+	
+	xbfgs = zeros(2, N)
+	xbfgs[:,1] = x0; 
+	
+	xlbfgs3 = zeros(2, N)
+	xlbfgs3[:,1] = x0; 
+	
+	xlbfgs1 = zeros(2, N)
+	xlbfgs1[:,1] = x0; nothing
+	
 end
 
 # ╔═╡ f2cf1870-cdc2-40b2-8229-b1f47a552508
@@ -252,6 +262,16 @@ md"""
 # ╔═╡ b28af950-a1cc-4807-82e8-c6ae6aec1825
 md"""
 #### Construct the DFP
+"""
+
+# ╔═╡ d3add08c-1c7b-4c62-bba0-ea5d3317e02f
+md"""
+#### Construct the BFGS
+"""
+
+# ╔═╡ 8404fbb4-9ae7-4028-886b-50a43f715711
+md"""
+#### Construct the L-BFGS
 """
 
 # ╔═╡ 20476b16-8936-4c0f-96fa-b4ed72c7cb4e
@@ -394,7 +414,7 @@ begin
 		g′ = ∇f(x′)
 		s = x′ - x
 		y = g′ - g
-		Q[:] = Q - Q*s*s'*Q/(y'*Q*y) + s*s'/(s'*y)
+		Q[:] = Q - Q*y*y'*Q/(y'*Q*y) + s*s'/(s'*y)
 		
 		return x′
 	end
@@ -410,15 +430,65 @@ begin
 		M.Q = Matrix(1.0I, m, m)
 		return M
 	end
+	
 	function step!(M::BFGS, f, ∇f, x)
 		Q, g = M.Q, ∇f(x)
+		
 		α = line_search(f, x, -Q*g)
 		x′ = x - α*Q*g
 		g′ = ∇f(x′)
 		s = x′ - x
 		y = g′ - g
 		Q[:] = Q - (s*y'*Q + Q*y*s')/(s'*y) + 
-				(1 + (y'*Q*y)/(s'*y))[1]*(s*s')/(s'*y)
+				(1 + (y'*Q*y)/(s'*y))*(s*s')/(s'*y)
+		
+		return x′
+	end
+end
+
+# ╔═╡ c9b21b1d-6b76-4f31-a159-ffafe71ac357
+begin
+	mutable struct LimitedMemoryBFGS <: DescentMethod
+		m
+		ss
+		ys
+		qs
+	end
+	
+	function init!(M::LimitedMemoryBFGS, f, ∇f, x)
+		M.ss = []
+		M.ys = []
+		M.qs = []
+
+		return M
+	end
+
+	function step!(M::LimitedMemoryBFGS, f, ∇f, x)
+		ss, ys, qs, g = M.ss, M.ys, M.qs, ∇f(x)
+		m = length(ss)
+		if m > 0
+			q = g
+			for i in m:-1:1
+				qs[i] = copy(q)
+				q -= (ss[i]'*q)/(ys[i]'*ss[i])*ys[i]
+			end
+			z = (ys[m] .* ss[m] .* q) / (ys[m]⋅ys[m])
+			for i in 1:m
+				z += ss[i]*(ss[i]' * qs[i] - ys[i]' * z)/(ys[i]' * ss[i])
+			end
+			α = line_search(f, x, -z)
+			x′ = x - α*z
+		else
+			α = line_search(f, x, -g)
+			x′ = x - α*g
+		end
+		g′ = ∇f(x′)
+		push!(ss, x′ - x); push!(ys, g′ - g)
+		push!(qs, zeros(length(x)))
+		while length(ss) > M.m
+			popfirst!(ss); popfirst!(ys); popfirst!(qs)
+		end
+
 		return x′
 	end
 end
@@ -433,7 +503,6 @@ begin
 	for i = 2:N
 		xgra[:,i] = step!(Mg, f, ∇f, xgra[:,i-1])
 				
-		#if norm(f(xgra[:,i]) .- f(xgra[:,i-1])) <= ε_A + ε_R*f(xcon[:,i-1])
 		if norm(∇f(xgra[:,i])) <= ε_G
 			global xrgra = xgra[:,1:i]	
 			break;
@@ -655,12 +724,11 @@ end
 # ╔═╡ 02cf98fa-3dcb-4225-a653-07d746d41b6c
 begin
 	xrdfp = [];
-	Q0 = 1.0I
 	# DFP
-	Mdfp = DFP(Q0)
+	Mdfp = DFP(1.0I)
 	Mdfp = init!(Mdfp, f, ∇f, x0)
 
-	# Next Stpe
+	# Next Step
 	for i = 2:N
 		xdfp[:,i] = step!(Mdfp, f, ∇f, xdfp[:,i-1])
 
@@ -669,6 +737,69 @@ begin
 			break;
 		else
 			global xrdfp = xdfp[:,1:i-1]
+		end
+	end
+end
+
+# ╔═╡ 4a675f8f-d56f-4977-b2c1-04d54b0bd361
+begin
+	xrbfgs = [];
+	# BFGS
+	
+	Mbfgs = BFGS(1.0I)
+	Mbfgs = init!(Mbfgs, f, ∇f, x0)
+
+	# Next Step
+	for i = 2:N
+		xbfgs[:,i] = step!(Mbfgs, f, ∇f, xbfgs[:,i-1])
+
+		if norm(∇f(xbfgs[:,i])) <= ε_G
+			global xrbfgs = xbfgs[:,1:i]
+			break;
+		else
+			global xrbfgs = xbfgs[:,1:i-1]
+		end
+	end
+end
+
+# ╔═╡ 18f13a91-35bd-465a-9eb0-ba04272165c4
+begin
+	xrlbfgs3 = [];
+	# BFGS
+	
+	Mlbfgs3 = LimitedMemoryBFGS(3, 1, 1, 1)
+	Mlbfgs3 = init!(Mlbfgs3, f, ∇f, x0)
+
+	# Next Step
+	for i = 2:N
+		xlbfgs3[:,i] = step!(Mlbfgs3, f, ∇f, xlbfgs3[:,i-1])
+
+		if norm(∇f(xlbfgs3[:,i])) <= ε_G
+			global xrlbfgs3 = xlbfgs3[:,1:i]
+			break;
+		else
+			global xrlbfgs3 = xlbfgs3[:,1:i-1]
+		end
+	end
+end
+
+# ╔═╡ 39a3b12c-6b59-4bd2-9e28-5c3ea09e0385
+begin
+	xrlbfgs1 = [];
+	# BFGS
+	
+	Mlbfgs1 = LimitedMemoryBFGS(1, 1, 1, 1)
+	Mlbfgs1 = init!(Mlbfgs1, f, ∇f, x0)
+
+	# Next Step
+	for i = 2:N
+		xlbfgs1[:,i] = step!(Mlbfgs1, f, ∇f, xlbfgs1[:,i-1])
+
+		if norm(∇f(xlbfgs1[:,i])) <= ε_G
+			global xrlbfgs1 = xlbfgs1[:,1:i]
+			break;
+		else
+			global xrlbfgs1 = xlbfgs1[:,1:i-1]
 		end
 	end
 end
@@ -700,7 +831,7 @@ begin
 	
 
 	#-----------------------------------------------------------------
-	# Newton's with linesearch
+	# Newton's with line search
 	bx6 = CairoMakie.Axis(fig2[1,2], xlabel = L"x_1", ylabel = L"x_2", 
 		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
 	limits!(bx6, -2.2, 2.2, -2.2, 3.2)
@@ -728,7 +859,7 @@ begin
 	text!(bx6, xrnewl[1,end]-0.1, xrnewl[2,end]+0.1, text=L"x^\ast", fontsize=22)
 
 	#-----------------------------------------------------------------
-	# BFP
+	# DFP
 	bx7 = CairoMakie.Axis(fig2[2,1], xlabel = L"x_1", ylabel = L"x_2", 
 		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
 	limits!(bx7, -2.2, 2.2, -2.2, 3.2)
@@ -743,16 +874,56 @@ begin
 		linewidth=2)
 
 	Ndfp = size(xrdfp, 2)
-	#Nnapl = size(xrnewapl, 2)
+	Nbfgs = size(xrbfgs, 2)
+	
 
-	# BFP
+	# DFP
 	scatterlines!(bx7, xrdfp[1,1:Ndfp-1], xrdfp[2,1:Ndfp-1], color=:blue, 
 		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("DFP with $(Ndfp-1) iterations"))
 	
 	scatter!(bx7, xrdfp[1,end], xrdfp[2,end], markersize=10, color=:red,
 		strokewidth=1, strokecolor=:black)
 	text!(bx7, xrdfp[1,end]-0.1, xrdfp[2,end]+0.1, text=L"x^\ast", fontsize=22)
+
+	# BFGS
+	scatterlines!(bx7, xrbfgs[1,1:Nbfgs-1], xrbfgs[2,1:Nbfgs-1], color=:green, 
+		markercolor=:lightgreen, markersize=15, strokewidth = 1, strokecolor=:green, linewidth=2, label=("BFGS with $(Nbfgs-1) iterations"))
 	
+	scatter!(bx7, xrbfgs[1,end], xrbfgs[2,end], markersize=10, color=:red,
+		strokewidth=1, strokecolor=:black)
+	#text!(bx7, xrdfp[1,end]-0.1, xrdfp[2,end]+0.1, text=L"x^\ast", fontsize=22)
+
+	#-----------------------------------------------------------------
+	# LBFGS
+	bx8 = CairoMakie.Axis(fig2[2,2], xlabel = L"x_1", ylabel = L"x_2", 
+		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
+	limits!(bx8, -2.2, 2.2, -2.2, 3.2)
+
+	# Contour and initial point
+	text!(bx8, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
+	scatter!(bx8, x0[1], x0[2], markersize=15, strokewidth=2, strokecolor=:blue, 
+		color=:lightblue)
+	
+	contour!(bx8, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
+	contour!(bx8, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+		linewidth=2)
+	
+	Nlbfgs3 = size(xrlbfgs3, 2)
+	Nlbfgs1 = size(xrlbfgs1, 2)
+   # L-BFGS m=3
+	scatterlines!(bx8, xrlbfgs3[1,1:Nlbfgs3-1], xrlbfgs3[2,1:Nlbfgs3-1], 
+		color=:blue, markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("L-BFGS m=3 with $(Nlbfgs3-1) iterations"))
+	
+	scatter!(bx8, xrlbfgs3[1,end], xrlbfgs3[2,end], markersize=10, color=:red,
+		strokewidth=1, strokecolor=:black)
+	text!(bx8, xrlbfgs3[1,end]-0.1, xrlbfgs3[2,end]+0.1, text=L"x^\ast", fontsize=22)
+	
+	# L-BFGS m=1
+	scatterlines!(bx8, xrlbfgs1[1,1:Nlbfgs1-1], xrlbfgs1[2,1:Nlbfgs1-1], 
+		color=:green, markercolor=:lightgreen, markersize=15, strokewidth = 1, strokecolor=:green, linewidth=2, label=("L-BFGS m=1 with $(Nlbfgs1-1) iterations"))
+	
+	scatter!(bx8, xrlbfgs3[1,end], xrlbfgs3[2,end], markersize=10, color=:red,
+		strokewidth=1, strokecolor=:black)
 	
 end
 
@@ -762,7 +933,7 @@ begin
 	axislegend(bx5, fontsize=18)
 	axislegend(bx6, fontsize=18)
 	axislegend(bx7, fontsize=18)
-	#axislegend(bx4, fontsize=18)
+	axislegend(bx8, fontsize=18)
 
 	fig2
 end
@@ -775,16 +946,16 @@ end
 # ╠═d147e839-18ff-40fe-8a61-15d4fd4209b3
 # ╠═1bb09348-4ec9-46ff-83bf-dcbdbff5a1d0
 # ╟─a6b5d39f-dc54-4a6f-8dff-8d5923931983
-# ╟─e105054f-b798-4b3e-85fe-0fafd4519ffe
 # ╟─9c9328e2-78a4-4361-a18c-6b8dec5de817
 # ╟─944e78b3-29be-4b73-9bf4-250996963029
-# ╟─d3d14f77-86a1-4060-814c-aa27b28e3981
 # ╟─e7079934-b250-4846-827f-feee8d1ac2c6
 # ╠═08670520-306a-4f1d-8f82-79e094f15da3
 # ╟─12a097ad-b16a-4f78-aaf6-d416099a5d31
 # ╟─3774f258-6fdb-4a1a-acef-efba80f937ee
 # ╟─054a40ed-263a-4b9a-a8e2-2849268aa02c
 # ╟─d141a0dd-460b-43b0-9dbe-e80a1ee6a7b0
+# ╟─e105054f-b798-4b3e-85fe-0fafd4519ffe
+# ╟─d3d14f77-86a1-4060-814c-aa27b28e3981
 # ╟─dc6d5c9d-95b1-4fac-a73d-fe70ab114ea5
 # ╠═303ba852-0430-4d42-809a-46ccfdf5fe0c
 # ╠═8c5f0bae-b94f-458b-b9c0-432f8efecc4a
@@ -809,8 +980,13 @@ end
 # ╠═3e2cf0b8-94d7-47c6-b843-badc161df75f
 # ╟─b28af950-a1cc-4807-82e8-c6ae6aec1825
 # ╠═02cf98fa-3dcb-4225-a653-07d746d41b6c
+# ╟─d3add08c-1c7b-4c62-bba0-ea5d3317e02f
+# ╠═4a675f8f-d56f-4977-b2c1-04d54b0bd361
+# ╟─8404fbb4-9ae7-4028-886b-50a43f715711
+# ╠═18f13a91-35bd-465a-9eb0-ba04272165c4
+# ╠═39a3b12c-6b59-4bd2-9e28-5c3ea09e0385
 # ╟─20476b16-8936-4c0f-96fa-b4ed72c7cb4e
-# ╠═9eb3739c-37a1-4063-9493-f4fa73fc8294
+# ╟─9eb3739c-37a1-4063-9493-f4fa73fc8294
 # ╟─658984bb-5e9b-4589-9329-1a703ab3cca1
 # ╠═fb150ab1-7723-4c89-8683-1eac024c2361
 # ╠═6827c066-028a-4f41-8642-40598c72c566
@@ -819,3 +995,4 @@ end
 # ╠═3f42e662-db76-474b-90c4-fe8e5c252890
 # ╠═24b4c32e-4f9d-46da-9013-80a7df3cc123
 # ╠═7b1e85c6-008f-44a6-896d-2860a281d2ee
+# ╠═c9b21b1d-6b76-4f31-a159-ffafe71ac357
