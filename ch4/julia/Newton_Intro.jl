@@ -110,6 +110,22 @@ begin
 	standard_Newton1(f, ∇f, n, xrange, x0, -0, 4, -20, 50)
 end
 
+# ╔═╡ 8fe21b84-ea38-43ec-bf1f-6a4dbd3ecb20
+html"""
+<style>
+	@media screen {
+		main {
+			margin: 0 auto;
+			max-width: 2000px;
+			min-width: 1000px;
+    		padding-left: max(283px, 10%);
+    		padding-right: max(383px, 10%); 
+            # 383px to accomodate TableOfContents(aside=true)
+		}
+	}
+</style>
+"""
+
 # ╔═╡ Cell order:
 # ╠═c98bf95e-7ae6-11ef-1efb-ed52cfaa1bce
 # ╠═2317a938-c119-414d-8773-20acf9d4c5e8
@@ -119,3 +135,4 @@ end
 # ╠═9a5808c1-68c0-407d-998f-ba44778603d2
 # ╟─faf4cd15-7a7d-4ccc-94ba-42a0eda75d01
 # ╠═107b2c28-92bd-4186-8e85-bd1ef266c3c0
+# ╠═8fe21b84-ea38-43ec-bf1f-6a4dbd3ecb20
