@@ -53,6 +53,31 @@ function bracket_minimum(f, x=0; s=1e-2, k=2.0)
 	end
 end
 
+# ╔═╡ 9c9328e2-78a4-4361-a18c-6b8dec5de817
+md"""
+### Objective function
+"""
+
+# ╔═╡ 79cbba2e-3c09-4904-89c0-6a1b71f4f219
+md"""
+Define level curves
+"""
+
+# ╔═╡ 12a097ad-b16a-4f78-aaf6-d416099a5d31
+md"""
+### Steepest Descent Plot
+"""
+
+# ╔═╡ 054a40ed-263a-4b9a-a8e2-2849268aa02c
+md"""
+### Newton's method plot
+"""
+
+# ╔═╡ dc6d5c9d-95b1-4fac-a73d-fe70ab114ea5
+md"""
+### Newton's Method vs Quasi-Newton's Method
+"""
+
 # ╔═╡ a6b5d39f-dc54-4a6f-8dff-8d5923931983
 md"""
 Quadratic function:
@@ -70,35 +95,13 @@ begin
 
 	# Rosenbrock function
 	Rosenbrock(x; a=1, b=0.5) = (a - x[1])^2 + b*(x[2] -x[1]^2)^2;
-end
 
-# ╔═╡ 9c9328e2-78a4-4361-a18c-6b8dec5de817
-md"""
-### Objective function
-"""
-
-# ╔═╡ 08670520-306a-4f1d-8f82-79e094f15da3
-#save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/newton1_2024.pdf", fig1)
-
-# ╔═╡ 12a097ad-b16a-4f78-aaf6-d416099a5d31
-md"""
-### Steepest Descent Plot
-"""
-
-# ╔═╡ 054a40ed-263a-4b9a-a8e2-2849268aa02c
-md"""
-### Newton's method plot
-"""
-
-# ╔═╡ e105054f-b798-4b3e-85fe-0fafd4519ffe
-begin
-	md"""
-	x = $(@bind x01 PlutoUI.Slider(-2:0.1:2, show_value=true, default = -1.2)), $(@bind x02 PlutoUI.Slider(-2:0.1:2, show_value=true, default=2))
-	"""
+	# Spring function
+	Spring(x; l1=12, l2=8, k1=1, k2=10, mg= 7) = 0.5*k1*(√((l1+x[1])^2 + x[2]^2)-l1)^2 + 0.5*k2*(√((l2-x[1])^2 + x[2]^2)-l2)^2 - mg*x[2]
 end
 
 # ╔═╡ d3d14f77-86a1-4060-814c-aa27b28e3981
-@bind f Select([Quadratic, Bean, Rosenbrock])
+@bind f Select([Quadratic, Bean, Rosenbrock, Spring])
 
 # ╔═╡ 1bb09348-4ec9-46ff-83bf-dcbdbff5a1d0
 begin
@@ -117,9 +120,29 @@ begin
 	ft = latexstring("f(x_1, x_2) = $(pf(x₁, x₂))")
 end
 
-# ╔═╡ dc6d5c9d-95b1-4fac-a73d-fe70ab114ea5
+# ╔═╡ 5377b20d-ea01-4056-9bf3-3730dbd8f225
+if (f == Spring)
+		lv2 = [ 1, 10,-200]; lv1 = -100:40:1200; nothing
+else
+		lv1 = -0:5:200; lv2 = [2, 0.3, 0.08]; nothing
+end
+
+# ╔═╡ e105054f-b798-4b3e-85fe-0fafd4519ffe
+begin
+	md"""
+	x = $(@bind x01 PlutoUI.Slider(-2:0.1:15, show_value=true, default = -1.2)), $(@bind x02 PlutoUI.Slider(-2:0.1:15, show_value=true, default=2))
+	"""
+end
+
+# ╔═╡ 08670520-306a-4f1d-8f82-79e094f15da3
+#save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/newton1_2024.pdf", fig1)
+
+# ╔═╡ 2cea8bb8-3871-4118-bb81-2a71db96203a
+#save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/newton2_2024spring.pdf", fig2)
+
+# ╔═╡ 9e1a1f0a-90cb-4141-a208-c6b88c01f469
 md"""
-### Newton's Method vs Quasi-Newton's Method
+#### Bisection
 """
 
 # ╔═╡ fe1d59f0-2283-4912-a13c-f45dd42bcac8
@@ -188,8 +211,16 @@ begin
 	x0 = [x01, x02] 	# initial point
 	ε_G = 1e-4; ε_A = 1e-14; ε_R = 1e-14
 	# Mesh Grid
-	xxs1 = -5:0.05:4;
-	xxs2 = -5:0.05:4; nothing
+	if (f == Spring)
+		x1max = 20; x2max = 20
+	end
+	if (f == Spring)
+		xxs1 = -20:0.05:20;
+		xxs2 = -20:0.05:20; nothing
+	else
+		xxs1 = -5:0.05:5;
+		xxs2 = -5:0.05:5; nothing
+	end
 end
 
 # ╔═╡ a562ffc6-56e0-4039-8618-4c213c1bff71
@@ -538,19 +569,24 @@ end
 begin
 	fig1 = Figure(size=(1000,800))
 	empty!(fig1)
+	
 	#--------------------------------------------------------------------------
 	# Steepest Descent
 	bx2 = CairoMakie.Axis(fig1[1,1], xlabel= L"x_1", ylabel = L"x_2",
 		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
-	limits!(bx2, -2.2, 2.2, -2.2, 3.2)
+	if (f == Spring)
+		limits!(bx2, -6, 16, -10, 20)
+	else
+		limits!(bx2, -2.2, 2.2, -2.2, 3.2)
+	end
 
 	# Contour and initial point
 	text!(bx2, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
 	scatter!(bx2, x0[1], x0[2], markersize=15, strokewidth=2, strokecolor=:blue, 
 		color=:lightblue)
-	lv1 = -0:5:200 				# level curve
+				# level curve
 	contour!(bx2, xxs1, xxs2, pf, levels = lv1, color=(:blue, 0.4), linewidth=2)
-	contour!(bx2, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+	contour!(bx2, xxs1, xxs2, pf, levels = lv2, color=(:blue, 0.4), 
 		linewidth=2)
 
 	# Scatter line and the optimal point.
@@ -565,15 +601,19 @@ begin
 	# Conjugate gradient
 	bx1 = CairoMakie.Axis(fig1[1,2], xlabel = L"x_1", ylabel = L"x_2", 
 		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
-	limits!(bx1, -2.2, 2.2, -2.2, 3.2)
+	if (f == Spring)
+		limits!(bx1, -6, 16, -10, 20)
+	else
+		limits!(bx1, -2.2, 2.2, -2.2, 3.2)
+	end
 
 	# Contour and initial point
 	text!(bx1, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
 	scatter!(bx1, x0[1], x0[2], markersize=15, strokewidth=2, strokecolor=:blue, 
 		color=:lightblue)
-	lv1 = -0:5:200 				# level curve
+		
 	contour!(bx1, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
-	contour!(bx1, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+	contour!(bx1, xxs1, xxs2, pf, levels = lv2, color=(:blue, 0.4), 
 		linewidth=2)
 
 	# Scatter line and the optimal point.
@@ -582,7 +622,7 @@ begin
 		markercolor=:lightblue, markersize=15, strokewidth = 1, strokecolor=:blue, linewidth=2, label=("CG with $(Np-2) iterations"))
 	scatter!(bx1, xrcon[1,end], xrcon[2,end], markersize=10, color=:red,
 		strokewidth=1, strokecolor=:black)
-	text!(bx1, xrcon[1,end]-0.1, xrcon[2,end]+0.1, text=L"x^\ast", fontsize=22)
+	text!(bx1, xrcon[1,end]-0.1, xrcon[2,end]+0.1, text=L"x^\ast", fontsize=22);
 	
 end
 
@@ -655,7 +695,11 @@ begin
 	# Newton's method without linesearch
 	bx3 = CairoMakie.Axis(fig1[2,1], xlabel = L"x_1", ylabel = L"x_2", 
 		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
-	limits!(bx3, -2.2, 2.2, -2.2, 3.2)
+	if (f == Spring)
+		limits!(bx3, -6, 16, -10, 20)
+	else
+		limits!(bx3, -2.2, 2.2, -2.2, 3.2)
+	end
 
 	# Contour and initial point
 	text!(bx3, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
@@ -663,7 +707,7 @@ begin
 		color=:lightblue)
 	
 	contour!(bx3, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
-	contour!(bx3, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+	contour!(bx3, xxs1, xxs2, pf, levels = lv2, color=(:blue, 0.4), 
 		linewidth=2)
 	
 	# Scatter line and the optimal point
@@ -680,7 +724,11 @@ begin
 	# Newton's with linesearch
 	bx4 = CairoMakie.Axis(fig1[2,2], xlabel = L"x_1", ylabel = L"x_2", 
 		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
-	limits!(bx4, -2.2, 2.2, -2.2, 3.2)
+	if (f == Spring)
+		limits!(bx4, -6, 16, -10, 20)
+	else
+		limits!(bx4, -2.2, 2.2, -2.2, 3.2)
+	end
 	
 	# Contour and initial point
 	text!(bx4, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
@@ -688,7 +736,7 @@ begin
 		color=:lightblue)
 	
 	contour!(bx4, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
-	contour!(bx4, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+	contour!(bx4, xxs1, xxs2, pf, levels = lv2, color=(:blue, 0.4), 
 		linewidth=2)
 	
 	# Scatter line and the optimal point
@@ -710,7 +758,7 @@ begin
 	
 end
 
-# ╔═╡ e7079934-b250-4846-827f-feee8d1ac2c6
+# ╔═╡ 4fb67f14-5653-4153-b2c5-c5de43950765
 begin
 	
 	axislegend(bx1, fontsize=18)
@@ -808,18 +856,22 @@ end
 begin
 	fig2 = Figure(size=(1000,800))
 	empty!(fig2)
+	
 	# Newton's method without linesearch
 	bx5 = CairoMakie.Axis(fig2[1,1], xlabel = L"x_1", ylabel = L"x_2", 
 		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
-	limits!(bx5, -2.2, 2.2, -2.2, 3.2)
-
+	if (f == Spring)
+		limits!(bx5, -6, 16, -10, 20)
+	else
+		limits!(bx5, -2.2, 2.2, -2.2, 3.2)
+	end
 	# Contour and initial point
 	text!(bx5, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
 	scatter!(bx5, x0[1], x0[2], markersize=15, strokewidth=2, strokecolor=:blue, 
 		color=:lightblue)
 	
 	contour!(bx5, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
-	contour!(bx5, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+	contour!(bx5, xxs1, xxs2, pf, levels = lv2, color=(:blue, 0.4), 
 		linewidth=2)
 	
 	
@@ -834,7 +886,11 @@ begin
 	# Newton's with line search
 	bx6 = CairoMakie.Axis(fig2[1,2], xlabel = L"x_1", ylabel = L"x_2", 
 		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
-	limits!(bx6, -2.2, 2.2, -2.2, 3.2)
+	if (f == Spring)
+		limits!(bx6, -6, 16, -10, 20)
+	else
+		limits!(bx6, -2.2, 2.2, -2.2, 3.2)
+	end
 	
 	# Contour and initial point
 	text!(bx6, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
@@ -842,7 +898,7 @@ begin
 		color=:lightblue)
 	
 	contour!(bx6, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
-	contour!(bx6, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+	contour!(bx6, xxs1, xxs2, pf, levels = lv2, color=(:blue, 0.4), 
 		linewidth=2)
 	
 		
@@ -862,7 +918,11 @@ begin
 	# DFP
 	bx7 = CairoMakie.Axis(fig2[2,1], xlabel = L"x_1", ylabel = L"x_2", 
 		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
-	limits!(bx7, -2.2, 2.2, -2.2, 3.2)
+	if (f == Spring)
+		limits!(bx7, -6, 16, -10, 20)
+	else
+		limits!(bx7, -2.2, 2.2, -2.2, 3.2)
+	end
 
 	# Contour and initial point
 	text!(bx7, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
@@ -870,7 +930,7 @@ begin
 		color=:lightblue)
 	
 	contour!(bx7, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
-	contour!(bx7, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+	contour!(bx7, xxs1, xxs2, pf, levels = lv2, color=(:blue, 0.4), 
 		linewidth=2)
 
 	Ndfp = size(xrdfp, 2)
@@ -897,7 +957,11 @@ begin
 	# LBFGS
 	bx8 = CairoMakie.Axis(fig2[2,2], xlabel = L"x_1", ylabel = L"x_2", 
 		aspect = AxisAspect(1.3), backgroundcolor=(:blue, 0.01))
-	limits!(bx8, -2.2, 2.2, -2.2, 3.2)
+	if (f == Spring)
+		limits!(bx8, -6, 16, -10, 20)
+	else
+		limits!(bx8, -2.2, 2.2, -2.2, 3.2)
+	end
 
 	# Contour and initial point
 	text!(bx8, x0[1], x0[2]+0.05, text=L"x_0", fontsize=22)
@@ -905,7 +969,7 @@ begin
 		color=:lightblue)
 	
 	contour!(bx8, xxs1, xxs2, pf, levels = lv1,  color=(:blue, 0.4), linewidth=2)
-	contour!(bx8, xxs1, xxs2, pf, levels = [2, 0.3, 0.11], color=(:blue, 0.4), 
+	contour!(bx8, xxs1, xxs2, pf, levels = lv2, color=(:blue, 0.4), 
 		linewidth=2)
 	
 	Nlbfgs3 = size(xrlbfgs3, 2)
@@ -936,7 +1000,24 @@ begin
 	axislegend(bx8, fontsize=18)
 
 	fig2
+	#empty!(fig2)
 end
+
+# ╔═╡ c0588b68-0bd5-41ab-b31d-fa0eb72afe61
+html"""
+<style>
+	@media screen {
+		main {
+			margin: 0 auto;
+			max-width: 1400px;
+			min-width: 1000px;
+    		padding-left: max(283px, 10%);
+    		padding-right: max(383px, 10%); 
+            # 383px to accomodate TableOfContents(aside=true)
+		}
+	}
+</style>
+"""
 
 # ╔═╡ Cell order:
 # ╠═76a55074-772f-11ef-02f5-4da9c17e00ed
@@ -945,20 +1026,24 @@ end
 # ╠═b9999cd3-3c12-481b-b2f0-419ba3ab3268
 # ╠═d147e839-18ff-40fe-8a61-15d4fd4209b3
 # ╠═1bb09348-4ec9-46ff-83bf-dcbdbff5a1d0
-# ╟─a6b5d39f-dc54-4a6f-8dff-8d5923931983
 # ╟─9c9328e2-78a4-4361-a18c-6b8dec5de817
 # ╟─944e78b3-29be-4b73-9bf4-250996963029
-# ╟─e7079934-b250-4846-827f-feee8d1ac2c6
-# ╠═08670520-306a-4f1d-8f82-79e094f15da3
+# ╠═79cbba2e-3c09-4904-89c0-6a1b71f4f219
+# ╠═5377b20d-ea01-4056-9bf3-3730dbd8f225
 # ╟─12a097ad-b16a-4f78-aaf6-d416099a5d31
 # ╟─3774f258-6fdb-4a1a-acef-efba80f937ee
 # ╟─054a40ed-263a-4b9a-a8e2-2849268aa02c
 # ╟─d141a0dd-460b-43b0-9dbe-e80a1ee6a7b0
-# ╟─e105054f-b798-4b3e-85fe-0fafd4519ffe
-# ╟─d3d14f77-86a1-4060-814c-aa27b28e3981
 # ╟─dc6d5c9d-95b1-4fac-a73d-fe70ab114ea5
+# ╟─8c5f0bae-b94f-458b-b9c0-432f8efecc4a
+# ╟─d3d14f77-86a1-4060-814c-aa27b28e3981
+# ╟─a6b5d39f-dc54-4a6f-8dff-8d5923931983
+# ╟─e105054f-b798-4b3e-85fe-0fafd4519ffe
+# ╠═4fb67f14-5653-4153-b2c5-c5de43950765
+# ╠═08670520-306a-4f1d-8f82-79e094f15da3
 # ╠═303ba852-0430-4d42-809a-46ccfdf5fe0c
-# ╠═8c5f0bae-b94f-458b-b9c0-432f8efecc4a
+# ╠═2cea8bb8-3871-4118-bb81-2a71db96203a
+# ╟─9e1a1f0a-90cb-4141-a208-c6b88c01f469
 # ╠═fe1d59f0-2283-4912-a13c-f45dd42bcac8
 # ╟─9a46e083-89a9-40f0-88e2-2999aa9e54c1
 # ╠═f500ed5b-d066-49db-8ac7-52fd22a3e62f
@@ -986,7 +1071,7 @@ end
 # ╠═18f13a91-35bd-465a-9eb0-ba04272165c4
 # ╠═39a3b12c-6b59-4bd2-9e28-5c3ea09e0385
 # ╟─20476b16-8936-4c0f-96fa-b4ed72c7cb4e
-# ╟─9eb3739c-37a1-4063-9493-f4fa73fc8294
+# ╠═9eb3739c-37a1-4063-9493-f4fa73fc8294
 # ╟─658984bb-5e9b-4589-9329-1a703ab3cca1
 # ╠═fb150ab1-7723-4c89-8683-1eac024c2361
 # ╠═6827c066-028a-4f41-8642-40598c72c566
@@ -996,3 +1081,4 @@ end
 # ╠═24b4c32e-4f9d-46da-9013-80a7df3cc123
 # ╠═7b1e85c6-008f-44a6-896d-2860a281d2ee
 # ╠═c9b21b1d-6b76-4f31-a159-ffafe71ac357
+# ╠═c0588b68-0bd5-41ab-b31d-fa0eb72afe61
