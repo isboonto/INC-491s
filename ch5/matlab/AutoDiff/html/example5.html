@@ -1,0 +1,170 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Example 5: Sinc function and rule of l'Hospital</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-05-09"><meta name="DC.source" content="example5.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Example 5: Sinc function and rule of l'Hospital</h1><!--introduction--><!--/introduction--><pre class="codeinput"><span class="comment">% Singularities of type "0/0" are resolved by l'Hospital's rule.</span>
+
+<span class="comment">% plot the sinc function and its derivatives</span>
+sinc = @(x) sin(x)./x;
+x = ainit(linspace(-8,8),2);
+y = sinc(x);
+figure(1), clf
+plot(x{0},y{0},x{0},y{1},x{0},y{2})
+grid <span class="string">on</span>, hold <span class="string">on</span>
+
+<span class="comment">% mark values at multiples of pi</span>
+x = ainit(pi*(-2:2),2);
+y = sinc(x);
+plot(x{0},[y{0};y{1};y{2}],<span class="string">'ro'</span>)
+[x{0};y{0};y{1};y{2}]
+title(<span class="string">'Sinc function and derivatives, accurately evaluated at x=0'</span>)
+<span class="comment">% Note that the second derivative at 0 is not plottet because</span>
+<span class="comment">% the order of x is 2 so that the second derivative cannot be</span>
+<span class="comment">% determined there. Generally, when initializing x with order k,</span>
+<span class="comment">% then derivatives up to order k-r are available, where r is</span>
+<span class="comment">% the number of times you have to apply l'Hospital's rule until</span>
+<span class="comment">% it yields a finite result.</span>
+
+<span class="comment">% Accordingly, the order of the Taylor polynomial is reduced.</span>
+x = ainit(0,4);
+disp(<span class="string">'Quartic Taylor polynomial of sin(x):'</span>)
+disp(ataylor(sin(x)))
+disp(<span class="string">'Cubic Taylor polynomial of sinc(x):'</span>)
+disp(ataylor(sinc(x)))
+disp(<span class="string">'Quadratic Taylor polynomial of sinc(x^2):'</span>)
+disp(ataylor(sinc(x.^2)))
+
+<span class="comment">% plot</span>
+t = linspace(-8,8);
+figure(2), clf
+plot(t,sinc(t),t,polyval(ataylor(sinc(x)),t))
+grid <span class="string">on</span>, axis([-8 8 -0.5 1])
+title(<span class="string">'Taylor polynomial of reduced degree'</span>)
+</pre><pre class="codeoutput">
+ans =
+
+   -6.2832   -3.1416         0    3.1416    6.2832
+   -0.0000    0.0000    1.0000    0.0000   -0.0000
+   -0.1592    0.3183         0   -0.3183    0.1592
+   -0.0507    0.2026       NaN    0.2026   -0.0507
+
+Quartic Taylor polynomial of sin(x):
+         0   -0.1667         0    1.0000         0
+
+Cubic Taylor polynomial of sinc(x):
+         0   -0.1667         0    1.0000
+
+Quadratic Taylor polynomial of sinc(x^2):
+     0     0     1
+
+</pre><img vspace="5" hspace="5" src="example5_01.png" style="width:284px;height:213px;" alt=""> <img vspace="5" hspace="5" src="example5_02.png" style="width:284px;height:213px;" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Example 5: Sinc function and rule of l'Hospital
+
+%%
+
+% Singularities of type "0/0" are resolved by l'Hospital's rule. 
+
+% plot the sinc function and its derivatives
+sinc = @(x) sin(x)./x;
+x = ainit(linspace(-8,8),2);
+y = sinc(x);
+figure(1), clf
+plot(x{0},y{0},x{0},y{1},x{0},y{2})
+grid on, hold on
+
+% mark values at multiples of pi
+x = ainit(pi*(-2:2),2);
+y = sinc(x);
+plot(x{0},[y{0};y{1};y{2}],'ro')
+[x{0};y{0};y{1};y{2}]
+title('Sinc function and derivatives, accurately evaluated at x=0')
+% Note that the second derivative at 0 is not plottet because 
+% the order of x is 2 so that the second derivative cannot be
+% determined there. Generally, when initializing x with order k,
+% then derivatives up to order k-r are available, where r is
+% the number of times you have to apply l'Hospital's rule until
+% it yields a finite result.
+
+% Accordingly, the order of the Taylor polynomial is reduced.
+x = ainit(0,4);
+disp('Quartic Taylor polynomial of sin(x):')
+disp(ataylor(sin(x)))
+disp('Cubic Taylor polynomial of sinc(x):')
+disp(ataylor(sinc(x)))
+disp('Quadratic Taylor polynomial of sinc(x^2):')
+disp(ataylor(sinc(x.^2)))
+
+% plot
+t = linspace(-8,8);
+figure(2), clf
+plot(t,sinc(t),t,polyval(ataylor(sinc(x)),t))
+grid on, axis([-8 8 -0.5 1])
+title('Taylor polynomial of reduced degree')
+
+##### SOURCE END #####
+--></body></html>
