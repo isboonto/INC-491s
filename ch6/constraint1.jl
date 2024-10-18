@@ -81,6 +81,25 @@ begin
 	fig2
 end
 
+# ╔═╡ 65e5b885-c495-4942-a897-c1bf5fafdd65
+begin
+	fig3 = Figure(size=(600,400), fontsize=18)
+	ax3 = CairoMakie.Axis(fig3[1,1], xlabel=L"$x_1$", ylabel=L"$x_2$", 
+		yticks=[-2, -1, 0, 1, 2])
+
+	f5(x1, x2) = (x2 + 100)^2 + 0.01*x1^2
+	c5(x1, x2) = x2 - cos(x1)
+	cx5 = x -> cos(x) 
+
+	xs5 = -10:0.1:10
+	ys5 = -4:0.1:4
+
+	contour!(ax3, xs5, ys5, f5)
+	lines!(ax3, xs5, cx5)
+
+	fig3
+end
+
 # ╔═╡ Cell order:
 # ╠═2f4683f8-8c5e-11ef-3ff0-7107adf83b3c
 # ╠═c18a845b-8c9d-41da-a528-fa9b6d60be90
@@ -89,3 +108,4 @@ end
 # ╠═14ce9e57-ca9f-46e9-a979-bcc2cd850d94
 # ╠═b607a3a1-e22b-43c6-87de-7c92306654bd
 # ╠═614f6e60-98b5-4699-94d0-105553e6a62d
+# ╠═65e5b885-c495-4942-a897-c1bf5fafdd65
