@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	using Pkg; Pkg.activate()
 	using CairoMakie
-	set_theme!(theme_latexfonts())
+	set_theme!(theme_latexfonts(), fontsize=18)
 	using Symbolics, ForwardDiff,LinearAlgebra
 	using PlutoUI
 end
