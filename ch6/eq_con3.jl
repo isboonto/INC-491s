@@ -14,7 +14,7 @@ begin
 	using ForwardDiff 
 	using LaTeXStrings
 	using CairoMakie
-		set_theme!(theme_latexfonts(), fontsize=18)
+		set_theme!(theme_latexfonts(), fontsize=18, font="amsmath")
 	using LinearAlgebra
 	#using MathTeXEngine
 	#to_font("New Computer Modern")
@@ -51,6 +51,15 @@ begin
 	ax = Axis(fig[1,1], xlabel = L"x_1", ylabel = L"x_2", 
 		aspect = AxisAspect(1.2))
 	hidedecorations!(ax, ticklabels=false, ticks=false, grid=true, label=false) 
+
+	h11 = x -> -sqrt(-(1/4)*x^2 + 1)  
+	x11s = -2:0.05:2
+	band!(ax, x11s,  -3*ones(length(x11s)), h11.(x11s), color=(:cyan, 0.4))
+	band!(ax, x11s, -h11.(x11s), 3*ones(length(x11s)) , color=(:cyan, 0.4))
+	x12s = -3:0.05:-2
+	x13s = 2:0.05:3
+	band!(ax, x12s, -3*ones(length(x12s)), 3*ones(length(x12s)), color=(:cyan, 0.4))
+	band!(ax, x13s, -3*ones(length(x13s)), 3*ones(length(x13s)), color=(:cyan, 0.4))
 		
 	contour!(ax,x1s,x2s,z, levels= -20:1:20, color=(:blue, 0.4), linewidth =1)
 	contour!(ax,x1s,x2s,h1, levels=[0], color=(:red, 1.0), linewidth=1)
@@ -88,12 +97,13 @@ begin
 	
 	scatter!(xA[1], xA[2], color=:blue)
 	scatter!(xB[1], xB[2], color=:blue)
+
 	
 	
 	cd("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/")
 	
-	#save("eq_con1b.pdf", fig)
-	#run(`pdfcrop  --clip eq_con1b.pdf eq_con1.pdf`)
+	save("eq_con2b.pdf", fig)
+	run(`pdfcrop  --clip eq_con2b.pdf eq_con2.pdf`)
 	fig
 end
 
