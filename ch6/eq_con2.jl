@@ -14,7 +14,7 @@ begin
 	using ForwardDiff 
 	using LaTeXStrings
 	using CairoMakie
-		set_theme!(theme_latexfonts(), fontsize=18, font="amsmath")
+		set_theme!(theme_latexfonts(), fontsize=18)
 	using LinearAlgebra
 	#using MathTeXEngine
 	#to_font("New Computer Modern")
@@ -23,15 +23,15 @@ end
 # ╔═╡ 6d9c1bb4-81fa-4883-93da-64b36ebffd57
 begin
 	f(x) = x[1] + 2x[2] 
-	h(x) = (1/4)*x[1]^2 + x[2]^2 - 1;
+	g(x) = (1/4)*x[1]^2 + x[2]^2 - 1;
 	#hx2 = x -> sqrt(1 - (1/4)*x^2)
 	
 	∇f(x)= ForwardDiff.gradient(f, x)
-	∇h(x)= ForwardDiff.gradient(h, x)
+	∇g(x)= ForwardDiff.gradient(g, x)
 	f1(x,y) = f([x,y])
-	h1(x,y) = h([x,y])
+	g1(x,y) = g([x,y])
 	gf(x,y) = ∇f([x,y])
-	gh(x,y) = ∇h([x,y])
+	gg(x,y) = ∇g([x,y])
 end
 
 # ╔═╡ 44e8859d-6bee-450e-be2c-77e6570131fc
@@ -52,45 +52,45 @@ begin
 		aspect = AxisAspect(1.2))
 	hidedecorations!(ax, ticklabels=false, ticks=false, grid=true, label=false) 
 
-	h11 = x -> -sqrt(-(1/4)*x^2 + 1)  
+	g11 = x -> -sqrt(-(1/4)*x^2 + 1)  
 	x11s = -2:0.05:2
-	band!(ax, x11s,  -3*ones(length(x11s)), h11.(x11s), color=(:cyan, 0.4))
-	band!(ax, x11s, -h11.(x11s), 3*ones(length(x11s)) , color=(:cyan, 0.4))
+	band!(ax, x11s,  -3*ones(length(x11s)), g11.(x11s), color=(:cyan, 0.4))
+	band!(ax, x11s, -g11.(x11s), 3*ones(length(x11s)) , color=(:cyan, 0.4))
 	x12s = -3:0.05:-2
 	x13s = 2:0.05:3
 	band!(ax, x12s, -3*ones(length(x12s)), 3*ones(length(x12s)), color=(:cyan, 0.4))
 	band!(ax, x13s, -3*ones(length(x13s)), 3*ones(length(x13s)), color=(:cyan, 0.4))
 		
 	contour!(ax,x1s,x2s,z, levels= -20:1:20, color=(:blue, 0.4), linewidth =1)
-	contour!(ax,x1s,x2s,h1, levels=[0], color=(:red, 1.0), linewidth=1)
+	contour!(ax,x1s,x2s,g1, levels=[0], color=(:red, 1.0), linewidth=1)
 	limits!(ax, -3,3,-2.4, 2.4)
 
 	
-	gA = gf(xA[1],xA[2])*0.6
-	hA = gh(xA[1],xA[2])*0.4
-	gB = gf(xB[1],xB[2])*0.6
-	hB = gh(xB[1],xB[2])*0.4
+	gfA = gf(xA[1],xA[2])*0.6
+	ggA = gg(xA[1],xA[2])*0.4
+	gfB = gf(xB[1],xB[2])*0.6
+	ggB = gg(xB[1],xB[2])*0.4
 
 	
 	
 	
-	arrows!(ax, [xA[1]], [xA[2]], [gA[1]], [gA[2]], lengthscale = 1, 
+	arrows!(ax, [xA[1]], [xA[2]], [gfA[1]], [gfA[2]], lengthscale = 1, 
 		color=:blue, linewidth=1, arrowsize=10)
 	text!(ax, L"\nabla f", position=(xA[1] + 0.6, xA[2] + 0.7), color=:blue)
 	text!(ax, L"\mathbf{x}_A", position=(xA[1]-0.65, xA[2]-0.2), color=:blue)
 	
-	arrows!(ax, [xA[1]], [xA[2]], [hA[1]], [hA[2]], lengthscale = 1, 
+	arrows!(ax, [xA[1]], [xA[2]], [ggA[1]], [ggA[2]], lengthscale = 1, 
 		color=:red, linewidth=1, arrowsize=10)
-	text!(ax, L"\nabla h", position=(hA[1]-1.2, hA[2]-1), color=:red)
+	text!(ax, L"\nabla g", position=(ggA[1]-1.2, ggA[2]-1), color=:red)
 
-	arrows!(ax, [xB[1]], [xB[2]], [gB[1]], [gB[2]], lengthscale = 1, 
+	arrows!(ax, [xB[1]], [xB[2]], [gfB[1]], [gfB[2]], lengthscale = 1, 
 		color=:blue, linewidth=1, arrowsize=10)
 	text!(ax, L"\nabla f", position=(xB[1] + 0.6, xB[2] + 0.7), color=:blue)
 	text!(ax, L"$\mathbf{x}_B$", position=(xB[1]-0.65, xB[2]-0.2), color=:blue)
 
-	arrows!(ax, [xB[1]], [xB[2]], [hB[1]], [hB[2]], lengthscale = 1, 
+	arrows!(ax, [xB[1]], [xB[2]], [ggB[1]], [ggB[2]], lengthscale = 1, 
 		color=:red, linewidth=1, arrowsize=10)
-	text!(ax, L"\nabla h", position=(hB[1]+0.7, hB[2]+0.6), color=:red)
+	text!(ax, L"\nabla g", position=(ggB[1]+0.7, ggB[2]+0.6), color=:red)
 
 	text!(ax, L"$$ Maximum", position=(xB[1]+0.2,xB[2]), color=:black)
 	text!(ax, L"$$ Minimum", position=(xA[1]+0.2,xA[2]), color=:black)
