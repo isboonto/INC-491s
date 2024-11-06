@@ -22,7 +22,7 @@ begin
 	#f = x -> norm(x) + sin(4atan(x[2], x[1]))
 	f = x -> x[1] + 2x[2]
 	g = x -> (1/4)x[1]^2 + x[2]^2 -1
-
+	
 	#p = x -> g(x) <= 0 ? -1/g(x) : Inf
 	p = x -> g(x) < 0 ? -log(-g(x)) : Inf
 	Qb = (x, μ) -> f(x) + (μ)*p(x) # need to have 0im
@@ -34,7 +34,7 @@ end
 # ╔═╡ 630e5707-6f06-4cbb-bfef-c636a68b3a03
 begin
 	N = 100
-	cs = 4; level1 = -20:cs:20			# contour space
+	cs = 1; level1 = -20:cs:20			# contour space
 	xopt = [-1.41434,  -0.707164]
 	x1s = -4:0.01:4; x2s = -4:0.01:4
 	
@@ -109,7 +109,7 @@ begin
 		xi = x_start
 		text!(ax1, xi[1] + 0.1, xi[2], text=L"\mathbf{x}_0", fontsize=24, 
 			color=:black)
-		contour!(ax1, x1s, x2s, Qbc, levels=-100:2:100, color = :red,
+		contour!(ax1, x1s, x2s, Qbc, levels= level1, color = :red,
 			linewidth=1)
 		scatterlines!(ax1, xs_P[1:i,1], xs_P[1:i,2], color=:red, strokewidth=1, 
 			strokecolor=:black, markersize=15)
