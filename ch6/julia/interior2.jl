@@ -56,13 +56,14 @@ begin
 		
 		#obj1 = x -> f(x) + 20*g(x)^2
 		#global x1 = optimize(obj1, x0).minimizer
-		x1 = x0
+		xerr = Inf
 		obj = x -> f(x) + μ1*p(x)
 
-		while (norm(ForwardDiff.gradient(obj, x1)) > 1e-2) && (i < N) 
+		while (norm(xerr) > 1e-10) && (i < N) 
 			#obj = x -> f(x) + (μ1)*log_b(g(x))
 			x1 = optimize(obj, x0).minimizer
 			xs_P[i+1,:] = x1
+			xerr = x1-x0
 			x0 = x1
 			μ1 = ρ * μ1
 			i = i + 1
@@ -119,15 +120,12 @@ begin
 end
 
 # ╔═╡ e3548ef3-d8a3-42a3-8cb2-de241df7b33e
-# ╠═╡ disabled = true
-#=╠═╡
 begin
 	cd("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/")
 		
-	save("interior_penal2b.pdf", fig)
-	run(`pdfcrop  --clip interior_penal2b.pdf interior_penal2.pdf`)
+	save("interior_penal3b.pdf", fig)
+	run(`pdfcrop  --clip interior_penal3b.pdf interior_penal3.pdf`)
 end
-  ╠═╡ =#
 
 # ╔═╡ Cell order:
 # ╠═3d2c5314-9b98-11ef-35c7-151aa31823ed
