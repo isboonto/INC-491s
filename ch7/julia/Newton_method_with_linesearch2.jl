@@ -281,26 +281,6 @@ md"""
 ### With Linear Constraints
 """
 
-# ╔═╡ ecbb6913-d499-432b-88c2-051fbb5f9c7d
-begin
-	function newton_step_lc(f, A, b, c, x0, λ0)
-		J = ForwardDiff.jacobian(x -> ∇f(c, x)'*λ0[end],x0)
-		H = ∇2f(f, x0)  + J
-		g = ∇f(f, x0)
-		  
-		Δz = [H A'; A zeros(size(A,1), size(A',2))] \ [-g - A'*λ0; -c(x0)]# zeros(size(A,1),1)]
-		
-		
-		λk1 = Δz[3] #-(A*(H\A'))*A*(H\g)
-		dk = Δz[1:2] #-H \ (A'*λk1 + g) #Δz[1:size(A,1)]
-		
-		α =  backtracking(f, x0, dk)	
-		#println(α, λk1, x0+α*dk)
-
-		return x0+ α*dk, λk1
-	end
-end
-
 # ╔═╡ e5224adf-c50c-460c-8ef3-89dbaf2ac1ea
 begin
 	function newton_step3(f, c, x0, λ0::Array)
@@ -346,19 +326,40 @@ begin
 		rd = g + A'*λ0                 # dual residual
 		rp = A*x0 - b                  # primal residual
 		  
-		Δz = [H A'; A zeros(size(A,1), size(A',2))] \ [-rd; -rp]# zeros(size(A,1),1)]
+		Δz = [H A'; A zeros(size(A,1), size(A',2))] \ (-1*[rd; rp])# zeros(size(A,1),1)]
 		
 		δk = Δz[size(x0,1)+1:end] #-(A*(H\A'))*A*(H\g)
 		dk = Δz[1:size(x0,1)] #-H \ (A'*λk1 + g) #Δz[1:size(A,1)]
  
-		α = 1; ρ = 0.1; γ = 0.5
-		 
-		#while norm([g + A'*(λ0 + α*δk); A*(x0 + α*dk) - b]) > (1 - ρ*α)*norm([g + #A'*λ0; A*x0 - b])
-		#	α = γ * α
-		#end
+		α = 1.0; ρ = 1e-2; γ = 0.5
+		#α = backtracking(f, x0, dk)	 
+		while norm([g + A'*(λ0 + α*δk); A*(x0 + α*dk) - b]) > (1 - ρ*α)*norm([g + 	
+			A'*λ0; A*x0 - b])
+			α = γ * α
+		end
 		#println(norm([g + A'*(λ0 + α*δk); A*(x0 + α*dk) - b]))
 		
 		return x0+ α*dk, λ0 + α*δk
+	end
+end
+
+# ╔═╡ ecbb6913-d499-432b-88c2-051fbb5f9c7d
+begin
+	function newton_step_lc(f, A, b, c, x0, λ0)
+		J = ForwardDiff.jacobian(x -> ∇f(c, x)'*λ0[end],x0)
+		H = ∇2f(f, x0)  + J
+		g = ∇f(f, x0)
+		  
+		Δz = [H A'; A zeros(size(A,1), size(A',2))] \ [-g - A'*λ0; -c(x0)]# zeros(size(A,1),1)]
+		
+		
+		λk1 = Δz[3] #-(A*(H\A'))*A*(H\g)
+		dk = Δz[1:2] #-H \ (A'*λk1 + g) #Δz[1:size(A,1)]
+		
+		α =  backtracking(f, x0, dk)	
+		#println(α, λk1, x0+α*dk)
+
+		return x0+ α*dk, λk1
 	end
 end
 
@@ -373,7 +374,7 @@ md"""
 
 # ╔═╡ 91c4d639-c27a-4db2-9756-7aa3079b724c
 begin
-	c1 = x -> 2x[1] + 3x[2] +1 
+	c1 = x -> 2x[1] + 3x[2] + 1
 	c2 = x -> 6*x[1] + 1x[2]
 	c3 = x -> (1/4)*x[1]^2 + x[2]^2 - 1 
 	
@@ -382,10 +383,12 @@ begin
 	cp3(x,y) = c3([x,y])
 
 	c = [c1, c3]
+	cpl2 = cp3
+
 	#c = [c1]
 	#cp(x,y) = [cp1(x,y)]
-	cp(x,y) = [cp1(x,y), cp3(x,y)]
-
+	cp(x,y) = [cp1(x,y), cpl2(x,y)]
+	
 	# when change c don't forget to change bl
 	
 	#Al = [∇f(c1,[1, 2])'; ∇f(c2,[1,2])']
@@ -395,15 +398,19 @@ begin
 	
 	xvc0 = [xvc01; xvc02]
 	
+	# for linear algorithm bl is important 
 	if (size(c,1) == 1)
 		λv0 = [1]
 		bl = [-1]
 	else
 		λv0 = [1, 1]
-		bl = [-1, 1]
+		bl = [-1, 0]   # for c2 use bl = [-1, 0] for c3 use bl = [-1, 1]
 	end
 	#println(size(c,1), λv0)
 end
+
+# ╔═╡ 753c89ff-0d98-4e1d-8526-c99e8202794d
+Al
 
 # ╔═╡ 3c454769-a30b-49bc-998f-bea558cfb26e
 newton_step3(f1, cp, xv0, λv0)
@@ -492,7 +499,8 @@ begin
 				color=:blue, linewidth=1)
 
 	contour!(ax2,xxs1, xxs2, cp1, levels=0:0, linewidth=3, color=:green)
-	contour!(ax2,xxs1, xxs2, cp3, levels=0:0, linewidth=3, color=:green)
+	
+	contour!(ax2,xxs1, xxs2, cpl2, levels=0:0, linewidth=3, color=:green)
 	scatterlines!(ax2,xs4[1,:], xs4[2,:], color=:red, linestyle=:dash,
 		marker=:circle, markercolor=:red, markersize=15, strokecolor=:black, 
 		strokewidth=1, label=("NL Con with $(size(xs4,2)) iterations"))
@@ -510,12 +518,12 @@ end
 begin
 	cd("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/")
 		
-	save("newton_ls_NL1b.pdf", fig2)
-	#save("newton_ls_inf1b.pdf", fig2)
-	run(`pdfcrop  --clip newton_ls_NL1b.pdf newton_ls_NL1.pdf`)
-	run(`rm newton_ls_NL1b.pdf`)
-	#run(`pdfcrop  --clip newton_ls_inf1b.pdf newton_ls_inf1.pdf`)
-	#run(`rm newton_ls_inf1b.pdf`)
+	#save("newton_ls_NL1b.pdf", fig2)
+	save("newton_ls_inf1b.pdf", fig2)
+	#run(`pdfcrop  --clip newton_ls_NL1b.pdf newton_ls_NL1.pdf`)
+	#run(`rm newton_ls_NL1b.pdf`)
+	run(`pdfcrop  --clip newton_ls_inf1b.pdf newton_ls_inf1.pdf`)
+	run(`rm newton_ls_inf1b.pdf`)
 end
 
 # ╔═╡ 0f902c4e-7ad1-4032-884b-10a140233955
@@ -621,16 +629,17 @@ end
 # ╠═a4d4389d-a0c2-414a-8bb0-b5f50699d4fb
 # ╠═22b5e8b4-e073-464e-8738-ab562965da75
 # ╠═42f7341b-3376-4dba-95ee-6848d5d97010
-# ╠═d5cb99e2-de14-400e-bfe4-0696441668ea
+# ╟─d5cb99e2-de14-400e-bfe4-0696441668ea
 # ╠═832a046b-e241-4cad-89de-04690837c4f7
 # ╠═a27a78db-c3e9-48b5-accc-65fcb73c70eb
 # ╠═940d736c-cfd2-4d11-b119-b6c6021a9405
-# ╠═ecbb6913-d499-432b-88c2-051fbb5f9c7d
 # ╠═91c4d639-c27a-4db2-9756-7aa3079b724c
+# ╠═753c89ff-0d98-4e1d-8526-c99e8202794d
 # ╠═e5224adf-c50c-460c-8ef3-89dbaf2ac1ea
 # ╠═3c454769-a30b-49bc-998f-bea558cfb26e
 # ╠═d5715cbd-edf9-4789-bbad-2c31af535e91
 # ╠═be1ffaf9-7cdf-4b88-9ab1-5c7645ce7431
+# ╠═ecbb6913-d499-432b-88c2-051fbb5f9c7d
 # ╠═e26e6c7a-5614-4394-bf22-99387782926a
 # ╠═7cf23816-ff86-412e-acb0-d8aaa40ebd9b
 # ╠═5e5961a3-f90d-46b9-b66c-5432ab1cd4c4
