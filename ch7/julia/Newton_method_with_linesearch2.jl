@@ -382,7 +382,7 @@ begin
 	cp2(x,y) = c2([x,y])
 	cp3(x,y) = c3([x,y])
 
-	c = [c1, c3]
+	Nc = 2    # number of constranit
 	cpl2 = cp3
 
 	#c = [c1]
@@ -399,7 +399,7 @@ begin
 	xvc0 = [xvc01; xvc02]
 	
 	# for linear algorithm bl is important 
-	if (size(c,1) == 1)
+	if (Nc == 1)
 		λv0 = [1]
 		bl = [-1]
 	else
@@ -515,6 +515,8 @@ begin
 end
 
 # ╔═╡ 3b8cdd93-d417-42d0-8dea-f33e3544ce9c
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	cd("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/")
 		
@@ -525,6 +527,7 @@ begin
 	run(`pdfcrop  --clip newton_ls_inf1b.pdf newton_ls_inf1.pdf`)
 	run(`rm newton_ls_inf1b.pdf`)
 end
+  ╠═╡ =#
 
 # ╔═╡ 0f902c4e-7ad1-4032-884b-10a140233955
 function solve_constrained_lp(f, A::Matrix, b::Vector, xv0)

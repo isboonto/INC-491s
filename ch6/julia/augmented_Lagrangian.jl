@@ -37,8 +37,9 @@ begin
 	gc = [g([x1, x2]) for x1 in x1s, x2 in x2s]
 
 	fig = Figure(size=(800,600), fontsize=20)
+	step_size = [0, 3, 4, 10]
 	
-	for (ii, k) in enumerate([0, 2, 5, 9])
+	for (ii, k) in enumerate(step_size)
 		global xs_P = zeros(k+1,2)
 		global x0 = x_start = [1, 1.5]
 		xs_P[1,:] = x0
@@ -61,16 +62,16 @@ begin
 		end
 
 		
-		if k == 0
+		if k == step_size[1]
 			ax1 = CairoMakie.Axis(fig[1,1], xlabel=L"$x_1$", ylabel=L"$x_2$", 
 				title=L"k = %$(i-1),\quad \mu = %$(round(μ1, digits=2)),\quad \lambda = %$(round(λ1, digits=2))")
-		elseif k == 2 
+		elseif k == step_size[2]
 			ax1 = CairoMakie.Axis(fig[1,2], xlabel=L"$x_1$", ylabel=L"$x_2$", 
 				title=L"k = %$(i-1),\quad \mu = %$(round(μ1, digits=2)),\quad \lambda = %$(round(λ1, digits=2))")
-		elseif k == 5
+		elseif k == step_size[3]
 			ax1 = CairoMakie.Axis(fig[2,1], xlabel=L"$x_1$", ylabel=L"$x_2$", 
 				title=L"k = %$(i-1),\quad \mu = %$(round(μ1, digits=2)),\quad \lambda = %$(round(λ1, digits=2))")
-		elseif k == 9
+		elseif k == step_size[end]
 			ax1 = CairoMakie.Axis(fig[2,2], xlabel=L"$x_1$", ylabel=L"$x_2$", 
 				title=L"k = %$(i-1),\quad \mu = %$(round(μ1, digits=2)),\quad \lambda = %$(round(λ1, digits=2))")
 		end

@@ -137,12 +137,15 @@ begin
 end
 
 # ╔═╡ f93c1e5e-a3ab-4d5c-a19b-751c0dac7188
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	cd("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/")
 		
 	save("quad_penal1b.pdf", fig)
 	run(`pdfcrop  --clip quad_penal1b.pdf quad_penal1.pdf`)
 end
+  ╠═╡ =#
 
 # ╔═╡ 5ad31383-2d68-42f9-9e8f-10cd1e0b9fc3
 md"""
@@ -154,7 +157,7 @@ The penalty value
 begin
 	N = 20
 	xs_P = zeros(N,2)
-	x0 = x_start = [1.7, 0.0]
+	x0 = x_start = [1.7, 2.0]
 	xs_P[1,:] = x0
 	μ_it = μ_itd
 	γ = 1.7
@@ -189,16 +192,22 @@ begin
 	fig7
 end
 
+# ╔═╡ a0ed3eb0-49ab-48ee-b8a5-8105dcb51f8d
+xs_P
+
 # ╔═╡ 534e0019-ae40-42c3-a1e1-1644abcdca71
 xs_P
 
 # ╔═╡ 1125e36e-3295-4217-8b13-4ed40801acd9
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	cd("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/")
 		
 	save("quad_penal_iter1b.pdf", fig7)
 	run(`pdfcrop  --clip quad_penal_iter1b.pdf quad_penal_iter1.pdf`)
 end
+  ╠═╡ =#
 
 # ╔═╡ 15bed972-ff53-4bcc-ac8f-f97663c939a6
 begin
@@ -243,6 +252,7 @@ end
 # ╠═e67d5422-b549-4a3a-a3b0-cd13d424243e
 # ╠═79507495-51e1-4a30-bb92-e664243b23ab
 # ╠═5c7b7401-97f7-42b0-8fd4-ec610f51de63
+# ╠═a0ed3eb0-49ab-48ee-b8a5-8105dcb51f8d
 # ╠═f93c1e5e-a3ab-4d5c-a19b-751c0dac7188
 # ╟─5ad31383-2d68-42f9-9e8f-10cd1e0b9fc3
 # ╠═d1e45dd2-fa0e-4152-91a3-a12bfdb6e1cd

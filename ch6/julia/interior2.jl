@@ -25,6 +25,9 @@ begin
 	
 	#p = x -> g(x) <= 0 ? -1/g(x) : Inf
 	p = x -> g(x) < 0 ? -log(-g(x)) : Inf
+	# if g(x) < 0 then p = -log(-g(x)) 
+	# else p = Inf 
+	# end 
 	Qb = (x, μ) -> f(x) + (μ)*p(x) # need to have 0im
 
 	# for band
