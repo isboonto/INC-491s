@@ -36,27 +36,6 @@ begin
 	#g1 = (x1, x2) -> x1^2 + (x2-1)^2 - 1
 end
 
-# ╔═╡ 84612895-9a53-405d-b1c7-f965872bce0a
-begin
-	fig1 = Figure(size=(600,400), fontsize=20)
-	ax1 = Axis(fig1[1,1], xlabel=L"$x_1$", ylabel=L"$x_2$", aspect=1.4)
-	limits!(ax1, -1.5, 1.5, -0.25, 1.5)
-
-	xs1 = -4:0.02:4; 
-	contour!(ax1, xs1, xs1, f, levels=-20:0.5:20)
-	contour!(ax1, xs1, xs1, g1, levels=[0], linewidth=2, color=:red)
-	contour!(ax1, xs1, xs1, g2, levels=[0], linewidth=2, color=:blue)
-
-	xb = -0.8:0.1:0.8
-	g1b = (x) -> x^2 
-	g2b = (x) -> sqrt(1-x^2)
-	band!(ax1, xb, g2b.(xb), g1b.(xb), color=(:orange, 0.4))
-	scatter!(ax1, 1/sqrt(2), 1/sqrt(2), markersize=10, strokecolor=:black, 
-		strokewidth=1)
-	text!(ax1, 0.72, 0.8, text=L"$\mathbf{x}$")
-	fig1
-end
-
 # ╔═╡ 7681215a-728f-4001-9af3-8c485694fc8e
 begin
 	#@variables x1, x2, λ1, λ2
@@ -69,24 +48,15 @@ begin
 	
 end
 
-# ╔═╡ 9162ffab-1f53-4ace-8dfb-d86c861e0503
-begin
-	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/ex5_han.png", fig1)
-end
-
 # ╔═╡ 93604d82-3a0e-410b-b161-86e5d1dbe9ee
 begin
 	k = 6
-	@show x = zeros(2,k); 
-	@show λ = zeros(2,k)
-	@show d_opt = zeros(2,k) 
+	x = zeros(2,k); 
+	λ = zeros(2,k)
+	d_opt = zeros(2,k) 
 
-	x[:,1] = [0.5, 1]
-#	x[:,2] = [11/12, 2/3]
-	λ[:,1] = [0, 0]
-#	λ[:,2] = [1/3, 2/3]
-#	λ[:,3] = [0, 0.7304]
-	i = 1
+	x[:,1] = [0.5, 1]; λ[:,1] = [0, 0]
+
 	for i = 2:k
 		#global i = i+1
 		∇f = ForwardDiff.gradient(ff, x[:,i-1])
@@ -114,6 +84,34 @@ begin
 		x[:,i] = x[:,i-1] + d_opt[:,i]
 		λ[:,i] = -[dual(con1); dual(con2)];
 	end
+end
+
+# ╔═╡ 84612895-9a53-405d-b1c7-f965872bce0a
+begin
+	fig1 = Figure(size=(600,400), fontsize=20)
+	ax1 = Axis(fig1[1,1], xlabel=L"$x_1$", ylabel=L"$x_2$", aspect=1.4)
+	limits!(ax1, -1.5, 1.5, -0.25, 1.5)
+
+	xs1 = -4:0.02:4; 
+	contour!(ax1, xs1, xs1, f, levels=-20:0.5:20)
+	contour!(ax1, xs1, xs1, g1, levels=[0], linewidth=2, color=:red)
+	contour!(ax1, xs1, xs1, g2, levels=[0], linewidth=2, color=:blue)
+
+	xb = -0.8:0.1:0.8
+	g1b = (x) -> x^2 
+	g2b = (x) -> sqrt(1-x^2)
+	band!(ax1, xb, g2b.(xb), g1b.(xb), color=(:orange, 0.4))
+	scatter!(ax1, 1/sqrt(2), 1/sqrt(2), markersize=15, color=:red, 
+		strokecolor=:black, strokewidth=1)
+	scatterlines!(ax1, x[1,:], x[2,:], markersize=15, color=:blue, linestyle=:dash)
+	text!(ax1, 0.52, 0.6, text=L"\mathbf{x}^\ast")
+	text!(ax1, x[1,1], x[2,1], text=L"\mathbf{x}_0")
+	fig1
+end
+
+# ╔═╡ 9162ffab-1f53-4ace-8dfb-d86c861e0503
+begin
+	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/ex5_han.png", fig1)
 end
 
 # ╔═╡ 8d6abc20-b1c1-4345-ba46-381d21dce36a
