@@ -47,6 +47,7 @@ md"""
 # ╔═╡ 8f3a8415-618c-48ef-89aa-8f4f028aba2a
 begin
 	f1 = x -> (1-x[1])^2 + (1-x[2])^2 + 0.5*(2x[2] - x[1]^2)^2
+	#f1 = x -> -x[1] - x[2]
 	#f1 = x -> x[1] + 2x[2]
 	#f1 = x -> x[1]^2 + x[2]^2 
 	#c = x->  x[1]^2 + 2x[1] - x[2]
@@ -377,13 +378,15 @@ begin
 	c1 = x -> 2x[1] + 3x[2] + 1
 	c2 = x -> 6*x[1] + 1x[2]
 	c3 = x -> (1/4)*x[1]^2 + x[2]^2 - 1 
+	#c1 = x -> x[1]^2 + x[2] 
+	#c3 = x -> x[1]^2 + x[2]^2 - 1
 	
 	cp1(x,y) = c1([x,y])
 	cp2(x,y) = c2([x,y])
 	cp3(x,y) = c3([x,y])
 
 	Nc = 2    # number of constranit
-	cpl2 = cp3
+	cpl2 = cp2
 
 	#c = [c1]
 	#cp(x,y) = [cp1(x,y)]
@@ -486,23 +489,29 @@ begin
 	
 	fig2 = Figure(size = (600,400))
 	ax2 = Axis(fig2[1,1], xlabel = L"x_1", ylabel = L"x_2",  
-		aspect = AxisAspect(1.2),xlabelsize=20, ylabelsize=20)
-	limits!(ax2, -4,4,-4, 4)
+		aspect = AxisAspect(1.4),xlabelsize=20, ylabelsize=20)
+	limits!(ax2, -3,3,-3, 3)
    
 	text!(ax2, xs4[1,end], xs4[2,end]+ 0.1, text= L"\mathbf{x}^\ast", 
 		fontsize=25, color=:black) 
 	text!(ax2, xvc0[1,1]-0.3, xvc0[2,1]+0.1, text= L"\mathbf{x}_0", fontsize=25, color=:black) 
 	
-	contour!(ax2,xxs1, xxs2, pf1, levels= -100:40:500
-				, color=:blue, linewidth=1) #
-	contour!(ax2,xxs1, xxs2, pf1, levels=level1,
-				color=:blue, linewidth=1)
+	contour!(ax2,xxs1, xxs2, pf1, levels= -200:4:300, linewidth=1) #
+	contour!(ax2,xxs1, xxs2, pf1, levels=-3:1:3, linewidth=1)
 
-	contour!(ax2,xxs1, xxs2, cp1, levels=0:0, linewidth=3, color=:green)
+	contour!(ax2,xxs1, xxs2, cp1, levels=0:0, linewidth=3, color=:red)
 	
-	contour!(ax2,xxs1, xxs2, cpl2, levels=0:0, linewidth=3, color=:green)
-	scatterlines!(ax2,xs4[1,:], xs4[2,:], color=:red, linestyle=:dash,
-		marker=:circle, markercolor=:red, markersize=15, strokecolor=:black, 
+	contour!(ax2,xxs1, xxs2, cpl2, levels=0:0, linewidth=3, color=:blue)
+
+	#xb = -1.5:0.05:0.89
+	#xb2 = 0.85:0.05:2
+	#g1b = (x) -> -(1/3) - (2/3)x
+	#g2b = (x) -> sqrt(1-(1/4)*x^2)
+	#band!(ax2, xb, g2b.(xb), g1b.(xb), color=(:orange, 0.4))
+	#band!(ax2, xb2, -g2b.(xb2), g2b.(xb2), color=(:orange, 0.4))
+	
+	scatterlines!(ax2,xs4[1,:], xs4[2,:], color=:blue, linestyle=:dash,
+		marker=:circle, markercolor=:blue, markersize=15, strokecolor=:black, 
 		strokewidth=1, label=("NL Con with $(size(xs4,2)) iterations"))
 	scatterlines!(ax2,xs5[1,:], xs5[2,:], color=:black, linestyle=:dash,
 		marker='O', markercolor=:black, markersize=15, strokecolor=:black,
@@ -515,8 +524,6 @@ begin
 end
 
 # ╔═╡ 3b8cdd93-d417-42d0-8dea-f33e3544ce9c
-# ╠═╡ disabled = true
-#=╠═╡
 begin
 	cd("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/")
 		
@@ -527,7 +534,6 @@ begin
 	run(`pdfcrop  --clip newton_ls_inf1b.pdf newton_ls_inf1.pdf`)
 	run(`rm newton_ls_inf1b.pdf`)
 end
-  ╠═╡ =#
 
 # ╔═╡ 0f902c4e-7ad1-4032-884b-10a140233955
 function solve_constrained_lp(f, A::Matrix, b::Vector, xv0)
@@ -619,7 +625,7 @@ end
 # ╔═╡ Cell order:
 # ╠═c745146e-823a-11ee-1c63-a995bb36c382
 # ╠═9d9cc882-0077-48cf-80e1-e9e015127ff3
-# ╠═bee0071a-e636-4944-918f-d80d4958d75e
+# ╟─bee0071a-e636-4944-918f-d80d4958d75e
 # ╠═8f3a8415-618c-48ef-89aa-8f4f028aba2a
 # ╠═a542fc3c-1951-490d-97ed-627fe4590738
 # ╟─64196d3e-b82e-4ae4-819e-05a4dac54a1e
@@ -632,10 +638,10 @@ end
 # ╠═a4d4389d-a0c2-414a-8bb0-b5f50699d4fb
 # ╠═22b5e8b4-e073-464e-8738-ab562965da75
 # ╠═42f7341b-3376-4dba-95ee-6848d5d97010
-# ╟─d5cb99e2-de14-400e-bfe4-0696441668ea
+# ╠═d5cb99e2-de14-400e-bfe4-0696441668ea
 # ╠═832a046b-e241-4cad-89de-04690837c4f7
 # ╠═a27a78db-c3e9-48b5-accc-65fcb73c70eb
-# ╠═940d736c-cfd2-4d11-b119-b6c6021a9405
+# ╟─940d736c-cfd2-4d11-b119-b6c6021a9405
 # ╠═91c4d639-c27a-4db2-9756-7aa3079b724c
 # ╠═753c89ff-0d98-4e1d-8526-c99e8202794d
 # ╠═e5224adf-c50c-460c-8ef3-89dbaf2ac1ea
@@ -644,7 +650,7 @@ end
 # ╠═be1ffaf9-7cdf-4b88-9ab1-5c7645ce7431
 # ╠═ecbb6913-d499-432b-88c2-051fbb5f9c7d
 # ╠═e26e6c7a-5614-4394-bf22-99387782926a
-# ╠═7cf23816-ff86-412e-acb0-d8aaa40ebd9b
+# ╟─7cf23816-ff86-412e-acb0-d8aaa40ebd9b
 # ╠═5e5961a3-f90d-46b9-b66c-5432ab1cd4c4
 # ╠═3b8cdd93-d417-42d0-8dea-f33e3544ce9c
 # ╠═0f902c4e-7ad1-4032-884b-10a140233955

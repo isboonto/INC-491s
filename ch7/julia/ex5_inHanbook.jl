@@ -101,18 +101,22 @@ begin
 	g1b = (x) -> x^2 
 	g2b = (x) -> sqrt(1-x^2)
 	band!(ax1, xb, g2b.(xb), g1b.(xb), color=(:orange, 0.4))
-	scatter!(ax1, 1/sqrt(2), 1/sqrt(2), markersize=15, color=:red, 
-		strokecolor=:black, strokewidth=1)
+	
 	scatterlines!(ax1, x[1,:], x[2,:], markersize=15, color=:blue, linestyle=:dash)
+	scatter!(ax1, 1/sqrt(2), 1/sqrt(2), markersize=12, color=:red, 
+		strokecolor=:black, strokewidth=1)
 	text!(ax1, 0.52, 0.6, text=L"\mathbf{x}^\ast")
 	text!(ax1, x[1,1], x[2,1], text=L"\mathbf{x}_0")
 	fig1
 end
 
 # ╔═╡ 9162ffab-1f53-4ace-8dfb-d86c861e0503
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/ex5_han.png", fig1)
 end
+  ╠═╡ =#
 
 # ╔═╡ 8d6abc20-b1c1-4345-ba46-381d21dce36a
 x
