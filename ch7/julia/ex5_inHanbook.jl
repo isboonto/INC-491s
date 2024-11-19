@@ -4,13 +4,25 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    #! format: off
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+    #! format: on
+end
+
 # ╔═╡ 7c7d889c-a3df-11ef-1699-f99f594e0205
 using Pkg; Pkg.activate()
 
 # ╔═╡ 90ddcb7c-d784-4ac5-82bb-02bb71196fc8
 begin
 	using CairoMakie; CairoMakie.activate!()
-	using LaTeXStrings
+	using LaTeXStrings, PlutoUI
 
 	
 	# Path to the Latin Modern font files
@@ -48,9 +60,22 @@ begin
 	
 end
 
+# ╔═╡ 9162ffab-1f53-4ace-8dfb-d86c861e0503
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/ex5_han.png", fig1)
+end
+  ╠═╡ =#
+
+# ╔═╡ 708cbab8-a258-4adb-9f74-47fc1466139d
+md"""
+k = $(@bind k PlutoUI.Slider(1:10, show_value = true, default = 0))
+"""
+
 # ╔═╡ 93604d82-3a0e-410b-b161-86e5d1dbe9ee
 begin
-	k = 6
+	#k = 10
 	x = zeros(2,k); 
 	λ = zeros(2,k)
 	d_opt = zeros(2,k) 
@@ -65,9 +90,9 @@ begin
 		Hg1 = ForwardDiff.hessian(gg1, x[:,i-1])
 		Hg2 = ForwardDiff.hessian(gg2, x[:,i-1])
 		B = ForwardDiff.hessian(ff, x[:,i-1]) + λ[:,i-1]' * [Hg1, Hg2]
-		@show p1 = gg1(x[:,i-1]); @show p2 = gg2(x[:,i-1]);
-		@show ∇p1 = ForwardDiff.gradient(gg1, x[:,i-1]); 
-		@show ∇p2 = ForwardDiff.gradient(gg2, x[:,i-1])
+		 p1 = gg1(x[:,i-1]); p2 = gg2(x[:,i-1]);
+		∇p1 = ForwardDiff.gradient(gg1, x[:,i-1]); 
+		∇p2 = ForwardDiff.gradient(gg2, x[:,i-1])
 
 		model = Model(Ipopt.Optimizer)
 		set_silent(model)
@@ -110,14 +135,6 @@ begin
 	fig1
 end
 
-# ╔═╡ 9162ffab-1f53-4ace-8dfb-d86c861e0503
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/ex5_han.png", fig1)
-end
-  ╠═╡ =#
-
 # ╔═╡ 8d6abc20-b1c1-4345-ba46-381d21dce36a
 x
 
@@ -136,6 +153,7 @@ d_opt
 # ╠═7681215a-728f-4001-9af3-8c485694fc8e
 # ╠═9162ffab-1f53-4ace-8dfb-d86c861e0503
 # ╠═93604d82-3a0e-410b-b161-86e5d1dbe9ee
+# ╠═708cbab8-a258-4adb-9f74-47fc1466139d
 # ╠═8d6abc20-b1c1-4345-ba46-381d21dce36a
 # ╠═04f88027-fa90-48df-9b56-452a0a05a627
 # ╠═57bda8fc-8750-4d3a-9371-194c5f13dcde
