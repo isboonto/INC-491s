@@ -60,14 +60,6 @@ begin
 	
 end
 
-# ╔═╡ 9162ffab-1f53-4ace-8dfb-d86c861e0503
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/ex5_han.png", fig1)
-end
-  ╠═╡ =#
-
 # ╔═╡ 708cbab8-a258-4adb-9f74-47fc1466139d
 md"""
 k = $(@bind k PlutoUI.Slider(1:10, show_value = true, default = 0))
@@ -144,16 +136,59 @@ x
 # ╔═╡ 57bda8fc-8750-4d3a-9371-194c5f13dcde
 d_opt
 
+# ╔═╡ 9162ffab-1f53-4ace-8dfb-d86c861e0503
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/ex5_han.png", fig1)
+end
+  ╠═╡ =#
+
+# ╔═╡ 08018a43-3350-411b-981b-92c60ef00d74
+
+
+# ╔═╡ 779db52c-b0fe-4a0d-83f4-4f51c39c3f0c
+function bfgs_update(H, s, y)
+    rho = 1.0 / (y' * s)
+    I = Matrix{Float64}(I, length(s), length(s))
+    V = I - rho * s * y'
+    H = V' * H * V + rho * s * s'
+    return H
+end
+
+# ╔═╡ 5ec86475-3c5a-4cb2-aad5-f0578e25c8fc
+function sqp(obj_func, gradient, x0; max_iter=100, tol=1e-6)
+    x = x0
+    H = Matrix{Float64}(I, length(x0), length(x0))  # Initial Hessian approximation
+    for iter in 1:max_iter
+        grad = gradient(x)
+        p = -H \ grad  # Search direction
+        alpha = 1.0  # Step length (can be optimized further)
+        x_new = x + alpha * p
+        s = x_new - x
+        y = gradient(x_new) - grad
+        H = bfgs_update(H, s, y)
+        x = x_new
+        if norm(grad) < tol
+            break
+        end
+    end
+    return x
+end
+
 # ╔═╡ Cell order:
 # ╠═7c7d889c-a3df-11ef-1699-f99f594e0205
 # ╠═90ddcb7c-d784-4ac5-82bb-02bb71196fc8
 # ╠═b171beff-1510-4320-baea-cc2e92aaa229
 # ╠═35be0489-ca00-4f5c-a604-7697f19740d4
-# ╠═84612895-9a53-405d-b1c7-f965872bce0a
-# ╠═7681215a-728f-4001-9af3-8c485694fc8e
-# ╠═9162ffab-1f53-4ace-8dfb-d86c861e0503
+# ╟─84612895-9a53-405d-b1c7-f965872bce0a
+# ╟─7681215a-728f-4001-9af3-8c485694fc8e
 # ╠═93604d82-3a0e-410b-b161-86e5d1dbe9ee
 # ╠═708cbab8-a258-4adb-9f74-47fc1466139d
 # ╠═8d6abc20-b1c1-4345-ba46-381d21dce36a
 # ╠═04f88027-fa90-48df-9b56-452a0a05a627
 # ╠═57bda8fc-8750-4d3a-9371-194c5f13dcde
+# ╠═9162ffab-1f53-4ace-8dfb-d86c861e0503
+# ╠═5ec86475-3c5a-4cb2-aad5-f0578e25c8fc
+# ╠═08018a43-3350-411b-981b-92c60ef00d74
+# ╠═779db52c-b0fe-4a0d-83f4-4f51c39c3f0c

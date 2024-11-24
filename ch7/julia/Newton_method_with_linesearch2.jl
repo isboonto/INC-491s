@@ -524,6 +524,8 @@ begin
 end
 
 # ╔═╡ 3b8cdd93-d417-42d0-8dea-f33e3544ce9c
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	cd("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/")
 		
@@ -534,6 +536,7 @@ begin
 	run(`pdfcrop  --clip newton_ls_inf1b.pdf newton_ls_inf1.pdf`)
 	run(`rm newton_ls_inf1b.pdf`)
 end
+  ╠═╡ =#
 
 # ╔═╡ 0f902c4e-7ad1-4032-884b-10a140233955
 function solve_constrained_lp(f, A::Matrix, b::Vector, xv0)
