@@ -59,7 +59,7 @@ begin
 	
 	As = ForwardDiff.jacobian(ax, xs0)
 	rd = -∇f(f, xs0) + As'*λs0
-	Ws = ∇2f(f, xs0) - ∇2f(a1,xs0)*λs0[1] - ∇2f(a2, xs0)*λs0[2]
+	Ws = ∇2f(f, xs0) + ∇2f(a1,xs0)*λs0[1] + ∇2f(a2, xs0)*λs0[2]
 end
 
 # ╔═╡ 73e9f289-fb29-4e4d-b3ce-32e227270069
@@ -158,7 +158,7 @@ end
 # ╠═30424885-32cb-49ca-a4bc-4e133218fdf2
 # ╠═b214d950-6d6a-46eb-9796-8676b5e4eac2
 # ╠═798666d4-ffe7-4e15-8585-9f9d564554ee
-# ╠═73e9f289-fb29-4e4d-b3ce-32e227270069
+# ╟─73e9f289-fb29-4e4d-b3ce-32e227270069
 # ╠═14eabf2d-ee66-43aa-8f38-23b371eb6856
 # ╠═b832474b-7bdd-41c9-a22d-2da760a4389d
 # ╠═0f5850ad-26ed-4625-8319-22ada4d65941
