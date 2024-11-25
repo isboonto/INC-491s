@@ -62,18 +62,45 @@ begin
 	Ws = ∇2f(f, xs0) - ∇2f(a1,xs0)*λs0[1] - ∇2f(a2, xs0)*λs0[2]
 end
 
+# ╔═╡ 73e9f289-fb29-4e4d-b3ce-32e227270069
+md"""
+Solving 
+
+$\begin{align*}
+&\text{minimize} \qquad  f(\textbf{x})\\
+&\text{subject to} \quad a_i = 0 \quad \text{ where } i = 1,\ldots,p
+\end{align*}$
+
+$\begin{align*}
+\begin{bmatrix}\mathbf{W}_k & \mathbf{A}_k^T \\ \mathbf{A}_k & 0 \end{bmatrix}\begin{bmatrix}\delta_x \\ \delta_\lambda\end{bmatrix} = \begin{bmatrix}-\mathbf{g}_k + \mathbf{A}_k^T\lambda_k \\ \mathbf{a}_k\end{bmatrix}
+\end{align*}$
+where
+
+$\begin{align*} \mathbf{W}_k &= \nabla_{xx}^2f(\textbf{x}_k) + \sum_{i=1}^p(\mathbf{\lambda}_k)_i\nabla_{xx}^2a_i(\textbf{x}_k)\\
+\mathbf{A}_k &= \begin{bmatrix}\nabla_x^Ta_1(\textbf{x}_k) \\ \vdots \\ \nabla_x^Ta_p(\textbf{x}_k)\end{bmatrix}, \qquad \mathbf{g}_k = \nabla_xf(\textbf{x}) \\
+\mathbf{a}_k &= \begin{bmatrix}a_1(x_k) & a_2(x_k) & \cdots & a_p(x_k)\end{bmatrix}^T\\
+\lambda_k &\geq 0\end{align*}$
+The problem can be considered as a quadratic problem:
+
+$\begin{align*}
+	&\text{minimize} \quad \frac{1}{2}\delta^T\mathbf{W}_k\delta + \delta^T\mathbf{g}_k \\
+	&\text{subject to} \quad \mathbf{A}_k\delta = -\mathbf{a}_k
+\end{align*}$
+
+"""
+
 # ╔═╡ 14eabf2d-ee66-43aa-8f38-23b371eb6856
 function Qp(f, ax, x0, λ0::Array)
 		# Should be ∇f(c,x) because we need to substitute the value of x after the jacobian
 		Ak = ForwardDiff.jacobian(ax, x0)	
-		rd = -∇f(f, x0) + Ak'*λ0
-		rp = ax(x0)
+		rd = -∇f(f, x0) - Ak'*λ0
+		rp = -ax(x0)
 		a1 = x -> ax(x)[1]; a2 = x -> ax(x)[2]
-		Wk = ∇2f(f,x0) - ∇2f(a1,x0)*λ0[1] - ∇2f(a2, x0)*λ0[2]
+		Wk = ∇2f(f,x0) + ∇2f(a1,x0)*λ0[1] + ∇2f(a2, x0)*λ0[2]
 
-		δz = [Wk -Ak'; -Ak zeros(size(Ak,1), size(Ak',2))]\[rd; ax(x0)]
+		δz = [Wk Ak'; Ak zeros(size(Ak,1), size(Ak',2))]\[rd; rp]
     	δx = δz[1:size(x0,1)]
-    	λ =  Ak'\((Wk)*δx + ∇f(f,x0))
+    	λ =  -Ak'\((Wk)*δx + ∇f(f,x0))
   
 		return x0+δx, λ
 	end
@@ -83,7 +110,7 @@ begin
 	kmax = 100
 	x = zeros(3, kmax)
 	λ = zeros(2, kmax)
-	x0 = x[:,1] = [3, 1.5, 3]; λ0 = λ[:,1] =  [-1, -1]; 
+	x0 = x[:,1] = [3, 1.5, 3]; λ0 = λ[:,1] =  [1, 1]; 
 	δx = 100*ones(3,1);
 	k = 1
 	while  (norm(δx) >= 1e-8) && (k <= kmax)
@@ -100,6 +127,8 @@ end
 # ╔═╡ 0f5850ad-26ed-4625-8319-22ada4d65941
 begin
 	xp, λp, k, f(xp[:,end]), a1(xp[:,end]), a2(xp[:,end])
+	@show xp[:,end]
+	@show λp[:,end]
 end
 
 # ╔═╡ 0e0d073d-6a28-4d7d-b46f-7ea7a0840b90
@@ -129,6 +158,7 @@ end
 # ╠═30424885-32cb-49ca-a4bc-4e133218fdf2
 # ╠═b214d950-6d6a-46eb-9796-8676b5e4eac2
 # ╠═798666d4-ffe7-4e15-8585-9f9d564554ee
+# ╠═73e9f289-fb29-4e4d-b3ce-32e227270069
 # ╠═14eabf2d-ee66-43aa-8f38-23b371eb6856
 # ╠═b832474b-7bdd-41c9-a22d-2da760a4389d
 # ╠═0f5850ad-26ed-4625-8319-22ada4d65941
