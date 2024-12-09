@@ -24,13 +24,7 @@ begin
 	using CairoMakie; CairoMakie.activate!()
 	using LaTeXStrings, PlutoUI
 
-	
-	# Path to the Latin Modern font files
-	font_path = "/usr/share/fonts/opentype/latex-xft-fonts/latinmodern-math.otf"
-
 	set_theme!(theme_latexfonts(), fontsize=20)
-
-
 end
 
 # ╔═╡ b171beff-1510-4320-baea-cc2e92aaa229
@@ -136,6 +130,9 @@ x
 # ╔═╡ 57bda8fc-8750-4d3a-9371-194c5f13dcde
 d_opt
 
+# ╔═╡ 85503c35-58b2-43f8-bd82-5bbf88fc279c
+f(x[1,end], x[2, end])
+
 # ╔═╡ 9162ffab-1f53-4ace-8dfb-d86c861e0503
 # ╠═╡ disabled = true
 #=╠═╡
@@ -143,6 +140,36 @@ begin
 	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/ex5_han.png", fig1)
 end
   ╠═╡ =#
+
+# ╔═╡ 0cd2316d-830e-471b-8f13-5ff806202882
+begin
+	
+		#f =  (x1, x2) -> -x1 - x2
+		#g1 = (x1, x2) -> x1^2 - x2
+		#g2 = (x1, x2) -> x1^2 + x2^2 - 1
+		
+		# Create a model with Ipopt as the solver
+	model = Model(Ipopt.Optimizer)
+	
+	# Define variables
+	@variable(model, x1)
+	@variable(model, x2)
+	
+	# Define the objective function
+	@objective(model, Min, -x1 - x2)
+	set_silent(model)
+	# Add nonlinear inequality constraints
+	@NLconstraint(model, x1^2 - x2 <= 0)
+	@NLconstraint(model, x1^2 + x2^2 - 1 <= 0)
+	
+	# Optimize the model
+	optimize!(model)
+	
+	# Print the results
+	println("Optimal solution: x1 = ", value(x1), ", x2 = ", value(x2))
+	println("Objective value: ", objective_value(model))
+	
+end
 
 # ╔═╡ 08018a43-3350-411b-981b-92c60ef00d74
 
@@ -181,14 +208,16 @@ end
 # ╠═90ddcb7c-d784-4ac5-82bb-02bb71196fc8
 # ╠═b171beff-1510-4320-baea-cc2e92aaa229
 # ╠═35be0489-ca00-4f5c-a604-7697f19740d4
-# ╟─84612895-9a53-405d-b1c7-f965872bce0a
+# ╠═84612895-9a53-405d-b1c7-f965872bce0a
 # ╟─7681215a-728f-4001-9af3-8c485694fc8e
 # ╠═93604d82-3a0e-410b-b161-86e5d1dbe9ee
 # ╠═708cbab8-a258-4adb-9f74-47fc1466139d
 # ╠═8d6abc20-b1c1-4345-ba46-381d21dce36a
 # ╠═04f88027-fa90-48df-9b56-452a0a05a627
 # ╠═57bda8fc-8750-4d3a-9371-194c5f13dcde
+# ╠═85503c35-58b2-43f8-bd82-5bbf88fc279c
 # ╠═9162ffab-1f53-4ace-8dfb-d86c861e0503
+# ╠═0cd2316d-830e-471b-8f13-5ff806202882
 # ╠═5ec86475-3c5a-4cb2-aad5-f0578e25c8fc
 # ╠═08018a43-3350-411b-981b-92c60ef00d74
 # ╠═779db52c-b0fe-4a0d-83f4-4f51c39c3f0c

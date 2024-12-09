@@ -70,19 +70,6 @@ begin
 	∇ff = x -> ForwardDiff.gradient(ff, x)
 end
 
-# ╔═╡ 9162ffab-1f53-4ace-8dfb-d86c861e0503
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	cd("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/")
-		
-	save("sqp_1b.pdf", fig1)
-	
-	run(`pdfcrop  --clip sqp_1b.pdf sqp_1.pdf`)
-	run(`rm sqp_1b.pdf`)
-end
-  ╠═╡ =#
-
 # ╔═╡ 332e4e2a-8938-49ac-9e89-9bee128a34b6
 ff([1,2])
 
@@ -176,6 +163,19 @@ begin
 	text!(ax1, x[1,1], x[2,1], text=L"\mathbf{x}_0")
 	fig1
 end
+
+# ╔═╡ 9162ffab-1f53-4ace-8dfb-d86c861e0503
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	cd("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/")
+		
+	save("sqp_1b.pdf", fig1)
+	
+	run(`pdfcrop  --clip sqp_1b.pdf sqp_1.pdf`)
+	run(`rm sqp_1b.pdf`)
+end
+  ╠═╡ =#
 
 # ╔═╡ 8d6abc20-b1c1-4345-ba46-381d21dce36a
 x
