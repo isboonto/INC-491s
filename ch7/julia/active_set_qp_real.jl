@@ -1,11 +1,11 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ b2f82600-ac2b-4e17-a946-d8a8636f752e
-using Pkg; Pkg.activate("/home/isudonto2000/.julia/")
+using Pkg; Pkg.activate()
 
 # ╔═╡ 0f44b0b6-b695-414e-966d-53866494ff19
 begin
@@ -111,7 +111,7 @@ begin
 	p3 = [-3, 0]
 	A3 = [1 1; -1 0; 0 -1; 1 0]
 	b3 = [2, 0, 0, 3/2]
-	x03 = [-0.5, 0]
+	x03 = [-0.5, 0.9]
 	# ---------------------------------
 	#xs2, fs2, k = qp_ie(H3, p3, A0, b0, x03)
 	#xs2, fs2, k = qp_ie(H2, p2, A2, b2, x02)
