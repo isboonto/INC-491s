@@ -29,93 +29,36 @@ end
 # ╔═╡ 5e7b2f91-17a9-4793-aff3-b9ed8d8e68e0
 using Symbolics
 
-# ╔═╡ f009577f-2265-4bb8-b1d1-84bf468a7baf
-# from  algorithms for Optimization book pp 36 
-# Algorithm 3.1
-function bracket_minimum(f, x=0; s=1e-2, k=2.0)
-	a, ya = x, f(x)
-	b, yb = a + s, f(a + s)
-	
-	if yb > ya 
-		a, b = b, a 		# swap
-		ya, yb = yb , ya
-		s = -s
-	end
-	while true
-		c, yc = b + s, f(b + s)
-		if yc > yb
-			return a < c ? (a, c) : (c, a)
-		end
-		a, ya, b, yb = b, yb, c, yc
-		s *= k
-	end
-end
-
-# ╔═╡ e859c8ff-45b2-4c71-a9d5-5b4e6cec522e
-function bisection(f, a₀, b₀, ϵ)
-
-    function D(f, a)
-        # Approximate the first derivative using central differences
-        h = 0.001
-        return (f(a + h) - f(a - h)) / (2 * h)
-    end
-
-    a = a₀
-    b = b₀
-
-    while (b - a) > ϵ
-        c = (a + b) / 2.0
-
-        if D(f, c) > 0
-            b = c
-        else
-            a = c
-        end
-    end
-
-    return (a + b) / 2 # this was changed
-end
-
-# ╔═╡ fd5db6d2-cdd4-4340-862d-0a193a1a2810
-# Exact line search
-function line_search(f, x, d)
-	objective = α -> f(x + α*d)
-	a, b = bracket_minimum(objective)
-	
-	# using brent method from Optim.jl
-	#res = Optim.optimize(objective, a, b)   # minimize
-	#α = Optim.minimizer(res)
-	α = bisection(objective, a, b, 1e-3)
-	
-	return α
-end
-
 # ╔═╡ c10e4bb5-6601-4f84-9481-ae30f461b1dd
 md"""
-### Objectiv function
+### Objective function
 """
 
 # ╔═╡ d6ce048a-29a0-4fe9-8d54-07b1c6115c10
 md"""
 Quadratic function:
 
-vertical axis β₁ = $(@bind β₁ PlutoUI.Slider(1:1:20; show_value=true, default=3)), horizontal β₂  $(@bind β₂ PlutoUI.Slider(1:1:20; show_value=true, default=3))
+vertical axis β₁ = $(@bind β₁ PlutoUI.Slider(1:1:20; show_value=true, default=2)), horizontal β₂  $(@bind β₂ PlutoUI.Slider(1:1:20; show_value=true, default=3))
 """
 
 # ╔═╡ a711c0f4-823b-45f5-a074-7a7e4218b7a4
 begin
 	# quadratic function
-	Quadratic(x) = β₁*x[1]^2 + β₂*x[2]^2 + x[1]*x[2]
+	Quadratic(x) = (1/2)*[x[1]; x[2]]'*[β₁ 1; 1 β₂]*[x[1]; x[2]]
+	
 
 	# Bean function
 	Bean(x; a=1, b=0.5) = (a-x[1])^2 + (1-x[2])^2 + (b)*(2x[2] - x[1]^2)^2; nothing
 
 	# Rosenbrock function
 	Rosenbrock(x; a=1, b=0.5) = (a - x[1])^2 + b*(x[2] -x[1]^2)^2;
+
+	# Boyd and Vanderberghe
+	Boyd(x) = exp(x[1] + 2x[2] -2) + exp(x[1] - 2x[2] - 2) + exp(-x[1] - 2)
 end
 
 # ╔═╡ 54ffce70-0ac7-4783-a61f-acf577750def
-@bind f Select([Quadratic, Bean, Rosenbrock])
+@bind f Select([Quadratic, Bean, Rosenbrock, Boyd])
 
 # ╔═╡ 7514c095-cab9-484b-8c1d-171f067fffd0
 begin
@@ -133,6 +76,7 @@ end
 # ╔═╡ 2b75caea-40c8-46fd-b484-35dd12e37e10
 begin
 	fig1 = Figure(size=(800,700)); nothing
+	println("define figure")
 end
 
 # ╔═╡ d38a6184-9470-4927-a256-cafb2ae562fa
@@ -140,12 +84,39 @@ begin
 	md"""
 	x = $(@bind x01 PlutoUI.Slider(-2:0.1:2, show_value=true, default = -1.2)), $(@bind x02 PlutoUI.Slider(-2:0.1:2, show_value=true, default=2))
 	
-	α3 = $(@bind α3 PlutoUI.Slider([0.01, 0.05, 0.1, 0.25, 0.3, 0.5], show_value=true, default= 0.25))
+	α3 = $(@bind α3 PlutoUI.Slider([0.01, 0.05, 0.1, 0.25, 0.3, 0.4, 0.543, 0.7], show_value=true, default= 0.543))
 	"""
 end
 
 # ╔═╡ 24d72df5-3cc0-4475-b36b-3aad1c693ee0
+# ╠═╡ disabled = true
+#=╠═╡
 save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/fixed_step_size.pdf", fig1)
+  ╠═╡ =#
+
+# ╔═╡ adf60444-fd6a-42d2-afe0-737220c76046
+md"""
+### Zig-Zags Property
+"""
+
+# ╔═╡ a366c24e-cdbe-483e-b0a7-08d91616b991
+md"""
+α4 = $(@bind α4 PlutoUI.Slider([0.01, 0.05, 0.1, 0.25, 0.3, 0.4, 0.543, 0.6, 0.7, 1.0], show_value=true, default= 0.543))
+"""
+
+# ╔═╡ 75863c55-09cf-47ea-b4dd-5e9d7a757c18
+# ╠═╡ disabled = true
+#=╠═╡
+save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/zig_zags.pdf", fig2)
+  ╠═╡ =#
+
+# ╔═╡ 8f0b493c-29f4-4ee3-a1fc-a13a1e4859ae
+function eigen_bounds(x::AbstractVector{<:Real}, f)
+	H = ForwardDiff.hessian(f, x)
+	vals = eigen(H).values
+
+	return maximum(vals), minimum(vals)
+end
 
 # ╔═╡ 7f2952a5-1ff4-43ec-88b8-bcfe84cb4936
 md"""
@@ -165,8 +136,8 @@ begin
 end
 
 # ╔═╡ 55828d5d-2cc2-4bfd-b179-6a8536dbdf0a
-function plot_gd(α, row, col, xrgra, color::Symbol)
-	ax1 = CairoMakie.Axis(fig1[row, col], xlabel=L"x_1", ylabel=L"x_2",
+function plot_gd(α, row, col, xrgra, color::Symbol, fig)
+	ax1 = CairoMakie.Axis(fig[row, col], xlabel=L"x_1", ylabel=L"x_2",
 						 aspect = AxisAspect(1.3), backgroundcolor=(:cyan, 0.05))
 	limits!(ax1, -2.2, 2.2, -2.2, 3.2)
 
@@ -189,7 +160,7 @@ function plot_gd(α, row, col, xrgra, color::Symbol)
 
 
 	axislegend(ax1, labelsize=14)
-	fig1
+	fig
 end
 
 # ╔═╡ 94513c71-e7a3-49d3-a8a0-48d14848d8e7
@@ -214,6 +185,14 @@ begin
 	
 		return x - α*g
 	end
+
+	function step_linesearch!(M::GradientDescent, f, ∇f, x)
+		α, g = M.α, ∇f(x)
+		λ_max, λ_min = eigen_bounds(x, f)
+		α = 2/(λ_max + λ_min)
+
+		return x - α*g
+	end
 end
 
 # ╔═╡ b45feff8-105f-4fe0-b7bd-9403c00752bd
@@ -235,9 +214,28 @@ function gradient_descent(xrga, α)
 	return xrgra
 end
 
+# ╔═╡ 8d21f692-2967-4274-897a-51ac4982c658
+function gradient_descent_linesearch(xrga0, α)
+	
+	Mg = GradientDescent(α) 	# initial α is 0
+	Mg = init!(Mg, f, ∇f, x0)
+	
+	# Next Step
+	for i = 2:N
+		xgra[:,i] = step_linesearch!(Mg, f, ∇f, xgra[:,i-1])
+		if norm(∇f(xgra[:,i])) <= ε_G
+			global xrgra0 = xgra[:,1:i]
+			break;
+		else
+			global xrgra0 = xgra[:, 1:i-1]
+		end
+	end
+	return xrgra0
+end
+
 # ╔═╡ b818ee57-4584-49bf-b05c-a30bd21a7610
 begin
-	α1 = 0.01; α2 = 0.06;# α3 = 0.25;
+	α1 = 0.01; α2 = 0.4;# α3 = 0.25;
 	xrgra1 = zeros(length(x0), N);
 	xrgra1 = gradient_descent(xrgra1, α1)
 
@@ -246,69 +244,99 @@ begin
 	
 	xrgra3 = zeros(length(x0), N);
 	xrgra3 = gradient_descent(xrgra3, α3)
+
+	xrgra4 = zeros(length(x0), N);
+	xrgra4 = gradient_descent(xrgra4, α4)
+
+	xrgra5 = zeros(length(x0), N);
+	γ = 2
+	fx = x -> x'*[2 0; 0 2γ]*x 
+	λ_max, λ_min = eigen_bounds(x0, fx)
+	α5 = 2/(λ_max + λ_min)
+	xrgra5 = gradient_descent_linesearch(xrgra5, α5)
+end
+
+# ╔═╡ a9c666f6-704c-4be8-baa1-d4940fc004ac
+begin
+	fig2 = Figure(size=(600,600))
+	plot_gd(α4, 1, 1, xrgra4, :red, fig2)
+end
+
+# ╔═╡ 5a80f411-f53a-4742-9a45-1f550f207a55
+begin
+	fig3 = Figure(size=(600,600))
+	plot_gd(α5, 1, 1, xrgra5, :red, fig3)
 end
 
 # ╔═╡ 04be0f27-9cfd-4b98-a0a7-71c941ede3c2
-function plot_trend(row, col)
-	ax1 = CairoMakie.Axis(fig1[row, col], xlabel=L"$$Iteration", ylabel=L"$$O
+function plot_trend(row, col, fig)
+	ax1 = CairoMakie.Axis(fig[row, col], xlabel=L"$$Iteration", ylabel=L"$$O
 						  bjective Function Value", aspect = AxisAspect(1.3), backgroundcolor=(:cyan, 0.05))
-	limits!(ax1, 0, 30, -1, 15)
+	
 	Np1 = size(xrgra1,2)
-	z = [f([xrgra1[1,x], xrgra1[2,x]]) for x in 1:Np1]
-	scatterlines!(ax1, 1:Np1, z, color=:blue,
+	z1 = [f([xrgra1[1,x], xrgra1[2,x]]) for x in 1:Np1]
+	scatterlines!(ax1, 1:Np1, z1, color=:blue,
 				  markercolor=:magenta, markersize=15, strokewidth=1, 	
 				  strokecolor=:blue, linewidth=1, label=("α = $(α1)"))
 	Np1 = size(xrgra2,2)
-	z = [f([xrgra2[1,x], xrgra2[2,x]]) for x in 1:Np1]
-	scatterlines!(ax1, 1:Np1, z, color=:blue,
+	z2 = [f([xrgra2[1,x], xrgra2[2,x]]) for x in 1:Np1]
+	scatterlines!(ax1, 1:Np1, z2, color=:blue,
 				  markercolor=:lightblue, markersize=15, strokewidth=1, 	
 				  strokecolor=:blue, linewidth=1, label=("α = $(α2)"))
 	
-	axislegend(ax1, labelsize=14)
-
 	Np1 = size(xrgra3,2)
-	z = [f([xrgra3[1,x], xrgra3[2,x]]) for x in 1:Np1]
-	scatterlines!(ax1, 1:Np1, z, color=:blue,
+	z3 = [f([xrgra3[1,x], xrgra3[2,x]]) for x in 1:Np1]
+	scatterlines!(ax1, 1:Np1, z3, color=:blue,
 				  markercolor=:red, markersize=15, strokewidth=1, 	
 				  strokecolor=:blue, linewidth=1, label=("α = $(α3)"))
 	
+	
+	max_value = maximum(filter(!isnan, vcat(z1, z2, z3)))
+	if isinf(max_value)
+		max_value = 15
+	end
+	limits!(ax1, 0, 30, -max_value/10, max_value + max_value/10)
+	
 	axislegend(ax1, labelsize=14)
 	
-	fig1
-	
+	fig
 end
 
 # ╔═╡ 18783fa7-e31a-4233-8846-064e8b8eb601
 begin
 	empty!(fig1)
-	plot_gd(α1, 1, 1, xrgra1, :magenta)
-	plot_gd(α2, 1, 2, xrgra2, :lightblue)
-	plot_gd(α3, 2, 1, xrgra3, :red)
-	plot_trend(2,2)
+	plot_gd(α1, 1, 1, xrgra1, :magenta, fig1)
+	plot_gd(α2, 1, 2, xrgra2, :lightblue, fig1)
+	plot_gd(α3, 2, 1, xrgra3, :red, fig1)
+	plot_trend(2,2, fig1)
 end
 
 # ╔═╡ Cell order:
 # ╠═6d12590c-7b74-11f0-1629-a916ddf947dc
 # ╠═ba33c9b6-8724-4b9e-9880-4f089772f481
 # ╠═5e7b2f91-17a9-4793-aff3-b9ed8d8e68e0
-# ╠═f009577f-2265-4bb8-b1d1-84bf468a7baf
-# ╠═e859c8ff-45b2-4c71-a9d5-5b4e6cec522e
-# ╠═fd5db6d2-cdd4-4340-862d-0a193a1a2810
 # ╟─c10e4bb5-6601-4f84-9481-ae30f461b1dd
 # ╠═a711c0f4-823b-45f5-a074-7a7e4218b7a4
 # ╠═7514c095-cab9-484b-8c1d-171f067fffd0
 # ╟─d6ce048a-29a0-4fe9-8d54-07b1c6115c10
-# ╟─43682112-7a32-48bc-9d57-d7b942bed5c4
+# ╠═43682112-7a32-48bc-9d57-d7b942bed5c4
 # ╠═54ffce70-0ac7-4783-a61f-acf577750def
-# ╠═2b75caea-40c8-46fd-b484-35dd12e37e10
+# ╟─2b75caea-40c8-46fd-b484-35dd12e37e10
 # ╟─d38a6184-9470-4927-a256-cafb2ae562fa
 # ╠═18783fa7-e31a-4233-8846-064e8b8eb601
 # ╠═24d72df5-3cc0-4475-b36b-3aad1c693ee0
+# ╟─adf60444-fd6a-42d2-afe0-737220c76046
+# ╟─a366c24e-cdbe-483e-b0a7-08d91616b991
+# ╠═a9c666f6-704c-4be8-baa1-d4940fc004ac
+# ╠═75863c55-09cf-47ea-b4dd-5e9d7a757c18
+# ╠═5a80f411-f53a-4742-9a45-1f550f207a55
+# ╠═8f0b493c-29f4-4ee3-a1fc-a13a1e4859ae
 # ╟─55828d5d-2cc2-4bfd-b179-6a8536dbdf0a
 # ╟─04be0f27-9cfd-4b98-a0a7-71c941ede3c2
 # ╠═7f2952a5-1ff4-43ec-88b8-bcfe84cb4936
 # ╠═61097e5a-095d-4e2c-8c03-50a15a6e2bbb
 # ╠═94513c71-e7a3-49d3-a8a0-48d14848d8e7
 # ╠═b45feff8-105f-4fe0-b7bd-9403c00752bd
+# ╠═8d21f692-2967-4274-897a-51ac4982c658
 # ╠═b818ee57-4584-49bf-b05c-a30bd21a7610
 # ╠═b67ab6c4-0ad7-4884-84a2-269af103de4b
