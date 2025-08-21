@@ -26,8 +26,10 @@ begin
 	using PlutoUI
 end
 
-# ╔═╡ 8b46ab10-a2d4-48c5-9441-57519275b1c1
-#@bind f Select([Quadratic, Bean, Rosenbrock, Boyd])
+# ╔═╡ 0fcd3c85-3134-4f7f-8494-d6d684904554
+md"""
+## Steepest Descent with a Fixed-Step size
+"""
 
 # ╔═╡ 3d198172-5ebb-4ca5-b9d0-6801355b22d5
 md"""
@@ -37,27 +39,43 @@ md"""
 # ╔═╡ c6b6a134-8dcd-44b1-a00e-0a1e53816d58
 begin
 	# quadratic function
-	Quadratic = x->(1/2) * x' * [2 0; 0 2γ] * x;
+	Quadratic(x) = (1/2) * x' * [2 0; 0 2γ] * x;
 
 	# Bean function
-	Bean = x->(1-x[1])^2 + (1-x[2])^2 + (0.5)*(2x[2] - x[1]^2)^2;
+	Bean(x) = (1-x[1])^2 + (1-x[2])^2 + (0.5)*(2x[2] - x[1]^2)^2;
 
 	# Rosenbrock function
-	Rosenbrock = x -> (1 - x[1])^2 + 0.5*(x[2] -x[1]^2)^2;
+	Rosenbrock(x) = (1 - x[1])^2 + 0.5*(x[2] -x[1]^2)^2;
 
 	# Boyd and Vanderberghe
-	Boyd = x -> exp(x[1] + 2x[2] -2) + exp(x[1] - 2x[2] - 2) + exp(-x[1] - 2)
+	Boyd(x) =  exp(x[1] + 2x[2] -2) + exp(x[1] - 2x[2] - 2) + exp(-x[1] - 2)
 end
+
+# ╔═╡ 8b46ab10-a2d4-48c5-9441-57519275b1c1
+md"""
+**1. Select a function:** $(@bind f Select([Quadratic, Bean, Rosenbrock,  Boyd]))
+"""
 
 # ╔═╡ ec1b44c6-d19d-4c04-980b-c51eaeb2ee17
 begin
-	f = x -> (1/2) * x' * [2 0; 0 2γ] * x
+	#f = x -> (1/2) * x' * [2 0; 0 2γ] * x
 	∇f = x -> ForwardDiff.gradient(f, x)
 	H = x -> ForwardDiff.hessian(f, x)
 end
 
+# ╔═╡ c62a928e-d9a5-4c58-a59b-40ddf1eb6af6
+md"""
+The performance of the fixed-step size method depends a lot on the type of function. We do not recommend using this method. 
+"""
+
+# ╔═╡ e99f5923-0815-4972-9b62-92ec8cc9b53f
+# ╠═╡ disabled = true
+#=╠═╡
+save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/optimal_step_size2.pdf", fig1)
+  ╠═╡ =#
+
 # ╔═╡ b277513d-80fd-4590-939a-eb6cf9ab2f73
-function gradient_descent_opt(f, ∇f, x0; α = 0.1, ε_G=1e-6, N=100)
+function gradient_descent_opt(f, ∇f, x0; α = 0.1, ε_G=1e-6, N=500)
 	xgra = zeros(length(x0), N)
 	xgra[:, 1] = x0
 
@@ -67,7 +85,7 @@ function gradient_descent_opt(f, ∇f, x0; α = 0.1, ε_G=1e-6, N=100)
 			return xgra[:, 1:i]
 		end
 	end
-
+	
 	return xgra
 end
 
@@ -107,10 +125,53 @@ end
 # ╔═╡ a7dd0e23-3c0e-494c-bd36-340a3edc76f2
 function eigen_bounds(x::AbstractVector{<:Real}, f)
 	H = ForwardDiff.hessian(f, x)
-	vals = eigen(H).values
-
-	return maximum(vals), minimum(vals)
+	
+	if any(isnan, H)
+		return 0, 0
+	else
+		vals = eigen(H).values
+		return maximum(vals), minimum(vals)
+	end
 end
+
+# ╔═╡ 098dabe6-5526-44da-8207-ae0d1f3720fe
+function gradient_descent_opt_all_steps(f, ∇f, x0; α = 0.1, ε_G=1e-6, N=500)
+	xgra = zeros(length(x0), N)
+	xgra[:, 1] = x0
+
+	for i in 2:N
+		xgra[:, i] = xgra[:, i-1] - α * ∇f(xgra[:, i-1])
+		if norm(∇f(xgra[:, i])) ≤ ε_G
+			return xgra[:, 1:i]
+		end
+		e_max, e_min = eigen_bounds(xgra[:, i-1], f)
+		if e_max != 0 && e_min != 0 
+			α = 2/(e_max + e_min)
+		else
+			α = α
+		end
+	end
+	
+	return xgra
+end
+
+# ╔═╡ 830d1bf9-f58d-4df3-bb5d-262e75a79983
+function_map = Dict(
+	"Fixed-Step" => gradient_descent_opt,
+	"Change each step" => gradient_descent_opt_all_steps
+)
+
+# ╔═╡ cee0a2db-411b-4285-8a47-216e92613709
+@bind selected_function_label Select(collect(keys(function_map)))
+
+# ╔═╡ 64652afc-9450-4624-ac7a-37943da5d9d2
+selected_function = function_map[selected_function_label]
+
+# ╔═╡ de4fc083-b249-48c6-80dc-427bc27eeb11
+md"""
+**2. Select a calculation:** **$selected_function**
+"""
+
 
 # ╔═╡ d51157d8-d36b-4322-bcad-021b55ad2751
 begin
@@ -119,26 +180,27 @@ begin
 		x0 = [-1.2, 2.0]
 		λ_max, λ_min = eigen_bounds(x0, f)
 		α1 = 2/(λ_max + λ_min)
-		xrgra1 = gradient_descent_opt(f, ∇f, x0; α=α1)
+		xrgra1 = selected_function(f, ∇f, x0; α=α1) #gradient_descent_opt(f, ∇f, x0; α=α1)
 		plot_gd(α1, f, 1, 1, xrgra1, :red, fig1, x0)
 	
 end
 
-# ╔═╡ e99f5923-0815-4972-9b62-92ec8cc9b53f
-# ╠═╡ disabled = true
-#=╠═╡
-save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/optimal_step_size2.pdf", fig1)
-  ╠═╡ =#
-
 # ╔═╡ Cell order:
 # ╠═aa9d275a-7d03-11f0-0253-6bb58f31d4cf
 # ╠═c294ad00-0158-415b-89f5-78748097465f
+# ╟─0fcd3c85-3134-4f7f-8494-d6d684904554
 # ╠═c6b6a134-8dcd-44b1-a00e-0a1e53816d58
 # ╠═8b46ab10-a2d4-48c5-9441-57519275b1c1
+# ╠═de4fc083-b249-48c6-80dc-427bc27eeb11
+# ╠═cee0a2db-411b-4285-8a47-216e92613709
+# ╠═64652afc-9450-4624-ac7a-37943da5d9d2
 # ╠═ec1b44c6-d19d-4c04-980b-c51eaeb2ee17
 # ╠═3d198172-5ebb-4ca5-b9d0-6801355b22d5
+# ╟─c62a928e-d9a5-4c58-a59b-40ddf1eb6af6
 # ╠═d51157d8-d36b-4322-bcad-021b55ad2751
 # ╠═e99f5923-0815-4972-9b62-92ec8cc9b53f
+# ╟─830d1bf9-f58d-4df3-bb5d-262e75a79983
 # ╠═b277513d-80fd-4590-939a-eb6cf9ab2f73
+# ╠═098dabe6-5526-44da-8207-ae0d1f3720fe
 # ╠═fc727865-959d-46e7-b556-941d545f8bf2
 # ╠═a7dd0e23-3c0e-494c-bd36-340a3edc76f2

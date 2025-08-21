@@ -142,9 +142,9 @@ function line_search(f, x, d)
 	a, b = bracket_minimum(objective)
 	
 	# using brent method from Optim.jl
-	#res = Optim.optimize(objective, a, b)   # minimize
-	#α = Optim.minimizer(res)
-	α = bisection(objective, a, b, 1e-3)
+	res = Optim.optimize(objective, a, b)   # minimize
+	α = Optim.minimizer(res)
+	#α = bisection(objective, a, b, 1e-3)
 	
 	return α
 end
@@ -364,7 +364,7 @@ end
 # ╟─607f325f-77ee-4421-ba31-8806e161d2e3
 # ╟─a9a572e6-2d50-4d24-8877-81d9647a95c1
 # ╠═60894cf7-333b-4db5-8735-ea1019ba729f
-# ╠═60dd22eb-e428-4d08-804d-90ede695295d
+# ╟─60dd22eb-e428-4d08-804d-90ede695295d
 # ╠═e6f40080-d609-47a9-9339-dcf6ae48c8a4
 # ╠═86974899-c880-46fb-8874-6349f4fd4e57
 # ╠═5db03d7c-a7b5-4280-aeb6-dcf1a023b9b9
