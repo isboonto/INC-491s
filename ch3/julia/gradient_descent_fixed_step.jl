@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.16
+# v0.20.17
 
 using Markdown
 using InteractiveUtils
@@ -23,7 +23,7 @@ using Pkg; Pkg.activate()
 begin
 	using CairoMakie; set_theme!(theme_latexfonts(), fontsize=18)
 	using LinearAlgebra, ForwardDiff
-	using PlutoUI, LaTeXStrings
+	using PlutoUI, LaTeXStrings, Latexify
 end
 
 # ╔═╡ 5e7b2f91-17a9-4793-aff3-b9ed8d8e68e0
@@ -69,8 +69,8 @@ end
 # ╔═╡ 43682112-7a32-48bc-9d57-d7b942bed5c4
 begin
 	@variables x₁ x₂
-
-	ft = latexstring("f(x_1, x_2)) = $(pf(x₁, x₂))")
+	original_str = latexify(pf(x₁, x₂))
+	ft = latexstring("f(x_1, x_2)) = " * original_str)
 end
 
 # ╔═╡ 2b75caea-40c8-46fd-b484-35dd12e37e10
@@ -270,8 +270,8 @@ end
 
 # ╔═╡ 04be0f27-9cfd-4b98-a0a7-71c941ede3c2
 function plot_trend(row, col, fig)
-	ax1 = CairoMakie.Axis(fig[row, col], xlabel=L"$$Iteration", ylabel=L"$$O
-						  bjective Function Value", aspect = AxisAspect(1.3), backgroundcolor=(:cyan, 0.05))
+	ax1 = CairoMakie.Axis(fig[row, col], xlabel=L"$$Iteration", ylabel=L"$$ 
+						  Objective Function Value", aspect = AxisAspect(1.3), backgroundcolor=(:cyan, 0.05))
 	
 	Np1 = size(xrgra1,2)
 	z1 = [f([xrgra1[1,x], xrgra1[2,x]]) for x in 1:Np1]
@@ -319,8 +319,8 @@ end
 # ╟─a711c0f4-823b-45f5-a074-7a7e4218b7a4
 # ╟─7514c095-cab9-484b-8c1d-171f067fffd0
 # ╟─d6ce048a-29a0-4fe9-8d54-07b1c6115c10
-# ╟─43682112-7a32-48bc-9d57-d7b942bed5c4
-# ╠═54ffce70-0ac7-4783-a61f-acf577750def
+# ╠═43682112-7a32-48bc-9d57-d7b942bed5c4
+# ╟─54ffce70-0ac7-4783-a61f-acf577750def
 # ╟─2b75caea-40c8-46fd-b484-35dd12e37e10
 # ╟─d38a6184-9470-4927-a256-cafb2ae562fa
 # ╠═18783fa7-e31a-4233-8846-064e8b8eb601
@@ -331,8 +331,8 @@ end
 # ╠═75863c55-09cf-47ea-b4dd-5e9d7a757c18
 # ╠═5a80f411-f53a-4742-9a45-1f550f207a55
 # ╠═8f0b493c-29f4-4ee3-a1fc-a13a1e4859ae
-# ╟─55828d5d-2cc2-4bfd-b179-6a8536dbdf0a
-# ╟─04be0f27-9cfd-4b98-a0a7-71c941ede3c2
+# ╠═55828d5d-2cc2-4bfd-b179-6a8536dbdf0a
+# ╠═04be0f27-9cfd-4b98-a0a7-71c941ede3c2
 # ╠═7f2952a5-1ff4-43ec-88b8-bcfe84cb4936
 # ╠═61097e5a-095d-4e2c-8c03-50a15a6e2bbb
 # ╠═94513c71-e7a3-49d3-a8a0-48d14848d8e7

@@ -1,32 +1,25 @@
 function [a, c] = bracket_minimum(f, x, s, k)
-% f: anonemous function 
-% x: starting point 
-% s: step size 
+% f: anonymous function, x: starting point, s: step size 
 % k: gamma (weight multiplier) 
-% last change 20/8/2024
-    
-  switch nargin
+switch nargin
       case 3
         k = 2.0;
       case 2
         s = 1e-2; k = 2.0;
       case 1
         x = 0; s = 1e-2; k = 2.0;
-  end
+ end
 
   a = x; ya = f(x); b = a + s; yb = f(a + s);
  
   % change the direction 
   if yb > ya
-      [a, b] = swap(a,b);
-      [ya, yb] = swap(ya, yb);
+      [a, b] = swap(a,b); [ya, yb] = swap(ya, yb);
       s = -s;
   end
-  % yb < ya 
-  flag = 1;
+  flag = 1;	 % yb < ya 
   while flag
-    s = s * k;
-    c = b + s; yc = f(b + s);
+    s = s * k; c = b + s; yc = f(b + s);
     if yc < yb
         a = b; ya = yb; b = c; yb = yc;
     else 

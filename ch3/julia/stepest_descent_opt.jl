@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.16
+# v0.20.17
 
 using Markdown
 using InteractiveUtils
@@ -67,12 +67,6 @@ end
 md"""
 The performance of the fixed-step size method depends a lot on the type of function. We do not recommend using this method. 
 """
-
-# ╔═╡ e99f5923-0815-4972-9b62-92ec8cc9b53f
-# ╠═╡ disabled = true
-#=╠═╡
-save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/optimal_step_size2.pdf", fig1)
-  ╠═╡ =#
 
 # ╔═╡ b277513d-80fd-4590-939a-eb6cf9ab2f73
 function gradient_descent_opt(f, ∇f, x0; α = 0.1, ε_G=1e-6, N=500)
@@ -185,6 +179,12 @@ begin
 	
 end
 
+# ╔═╡ e99f5923-0815-4972-9b62-92ec8cc9b53f
+# ╠═╡ disabled = true
+#=╠═╡
+save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/optimal_step_size1.pdf", fig1)
+  ╠═╡ =#
+
 # ╔═╡ Cell order:
 # ╠═aa9d275a-7d03-11f0-0253-6bb58f31d4cf
 # ╠═c294ad00-0158-415b-89f5-78748097465f
@@ -194,8 +194,8 @@ end
 # ╠═de4fc083-b249-48c6-80dc-427bc27eeb11
 # ╠═cee0a2db-411b-4285-8a47-216e92613709
 # ╠═64652afc-9450-4624-ac7a-37943da5d9d2
-# ╠═ec1b44c6-d19d-4c04-980b-c51eaeb2ee17
-# ╠═3d198172-5ebb-4ca5-b9d0-6801355b22d5
+# ╟─ec1b44c6-d19d-4c04-980b-c51eaeb2ee17
+# ╟─3d198172-5ebb-4ca5-b9d0-6801355b22d5
 # ╟─c62a928e-d9a5-4c58-a59b-40ddf1eb6af6
 # ╠═d51157d8-d36b-4322-bcad-021b55ad2751
 # ╠═e99f5923-0815-4972-9b62-92ec8cc9b53f

@@ -1,14 +1,16 @@
 
 clear a7  b7; clc; close all;
 clf; hold off;
+syms x
 
 f = @(x) (sin(x) + sin(x/2))/4;
+df = diff(f, x);
 
 t = -5:0.01:9;
 a0 = -5; b0 = 9;
 ymin = -0.5 ; ymax = 0.5 ;
 
-[a7, b7] = bisection_search(f, a0, b0, 5e-1);
+[a7, b7] = bisection_search(df, a0, b0, 5e-1);
 rowp = size(a7,1);
 
 figure(1);

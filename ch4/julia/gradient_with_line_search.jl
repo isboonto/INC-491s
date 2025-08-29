@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.16
+# v0.20.17
 
 using Markdown
 using InteractiveUtils
@@ -86,7 +86,7 @@ function plot_con(row, col, fig, pf, x0, xrgra, color::Symbol, α)
 
 	ax1 = CairoMakie.Axis(fig[row, col], xlabel=L"x_1", ylabel=L"x_2",
 						 aspect = AxisAspect(1.2), backgroundcolor=(:cyan, 0.05))
-	limits!(ax1, -2.2, 2.2, -2.2, 3.2)
+	limits!(ax1, -2.2, 2.2, -1, 3.2)
 
 	# Contourand initial point
 	z = [f([x, y]) for x in xxs1, y in xxs2]
@@ -181,15 +181,35 @@ function bisection(f, a₀, b₀, ϵ)
     return (a + b) / 2 # this was changed
 end
 
-# ╔═╡ e76a5f9c-c92b-4ec3-835f-5e0539768af9
-# backtracking Line Search
-function backtracking_line_search(f, ∇f, x, d, α; p=0.5, β=1e-4)
+# ╔═╡ 0adf5908-458e-4356-ae0b-dfc5f7d0e00f
+
+function backtracking_line_search(f, ∇f, x, d, α; ρ=0.5, β=1e-4)
 	y, g = f(x), ∇f(x) 
 	while f(x + α*d) > y + β*α*(g'*d)
-		α *= p
+		α *= ρ
 	end
 	
 	return α
+end
+
+
+# ╔═╡ a01618e3-472b-4d13-ac89-9549933948cb
+function gradient_descent_backtracking(f, ∇f, x0; α = 0.1, ε_G=1e-6, N=500)
+	xgra = zeros(length(x0), N)
+	xgra[:, 1] = x0
+
+	for i in 2:N
+		d = -∇f(xgra[:, i-1])
+		α =  backtracking_line_search(f, ∇f, xgra[:,i-1], d, 10; ρ=0.5, β=1e-4)
+		
+		xgra[:, i] = xgra[:, i-1] + α * d
+		if norm(∇f(xgra[:, i])) ≤ ε_G
+			return xgra[:, 1:i]
+		end
+		
+	end
+	
+	return xgra
 end
 
 # ╔═╡ d9d735b3-7962-4fae-abe5-a24348e5974a
@@ -199,28 +219,11 @@ function gradient_descent_line_search(f, ∇f, x0; α = 0.1, ε_G=1e-6, N=500)
 
 	for i in 2:N
 		d = -∇f(xgra[:, i-1])
-		xgra[:, i] = xgra[:, i-1] + α * d
-		if norm(∇f(xgra[:, i])) ≤ ε_G
-			return xgra[:, 1:i]
-		end
 		α = line_search(f, xgra[:, i-1], d)
-	end
-	
-	return xgra
-end
-
-# ╔═╡ a01618e3-472b-4d13-ac89-9549933948cb
-function gradient_descent_backtracking(f, ∇f, x0; α = 0.1, ε_G=1e-6, N=500)
-	xgra = zeros(length(x0), N)
-	xgra[:, 1] = x0
-
-	for i in 2:N
-		d = -∇f(xgra[:, i-1])
 		xgra[:, i] = xgra[:, i-1] + α * d
 		if norm(∇f(xgra[:, i])) ≤ ε_G
 			return xgra[:, 1:i]
 		end
-		α =  backtracking_line_search(f, ∇f, xgra[:,i-1], d, 10; p=0.5, β=1e-4)
 	end
 	
 	return xgra
@@ -230,16 +233,20 @@ end
 function gradient_descent_bisection(f, ∇f, x0; α = 0.1, ε_G=1e-6, N=500)
 	xgra = zeros(length(x0), N)
 	xgra[:, 1] = x0
-
+	
+	
 	for i in 2:N
 		d = -∇f(xgra[:, i-1])
+		
+		objective = α -> f(xgra[:, i-1] + α*d)
+		a, b = bracket_minimum(objective)
+		α = bisection(objective, a, b, 1e-3)
+		
 		xgra[:, i] = xgra[:, i-1] + α * d
 		if norm(∇f(xgra[:, i])) ≤ ε_G
 			return xgra[:, 1:i]
 		end
-		objective = α -> f(xgra[:, i-1] + α*d)
-		a, b = bracket_minimum(objective)
-		α = bisection(objective, a, b, 1e-3)
+		
 	end
 	
 	return xgra
@@ -268,7 +275,8 @@ begin
 	empty!(fig1)
 	x0 = [-1.2, 2.0]
 	λ_max, λ_min = eigen_bounds(x0, f)
-	α1 = 2/(λ_max + λ_min)
+	#α1 = 2/(λ_max + λ_min)
+	α1 = 0
 	xgra1 = selected_function(f, ∇f, x0; α=α1)
 	plot_con(1,1, fig1, f, x0, xgra1, :red, α1)
 end
@@ -278,12 +286,12 @@ end
 # ╟─18e81805-92de-4ea5-9e89-2d6873347ff9
 # ╠═8b5e3fa3-027e-4571-9f13-e53820b5800b
 # ╠═db418715-334b-4171-81f1-24c4e9b0533a
-# ╟─4987f44d-a95b-4b31-b958-a8bf88a2b0f5
-# ╟─61013f4b-77a0-464e-9178-54f2845f7bda
+# ╠═4987f44d-a95b-4b31-b958-a8bf88a2b0f5
+# ╠═61013f4b-77a0-464e-9178-54f2845f7bda
 # ╟─d42279d7-250a-4a63-981c-7c8f299eaea7
-# ╟─ea91b07b-465a-4d41-9c0c-52ca130eaf05
-# ╟─ae591bc9-efe0-4dfc-bf88-5abc7a606592
-# ╠═e37bd02c-f474-4329-92c7-215fb3f5b2df
+# ╠═ea91b07b-465a-4d41-9c0c-52ca130eaf05
+# ╠═ae591bc9-efe0-4dfc-bf88-5abc7a606592
+# ╟─e37bd02c-f474-4329-92c7-215fb3f5b2df
 # ╟─73922087-d2d1-43e8-b18b-ac990340aca4
 # ╠═a7b41e78-05e6-4e3a-9d91-44327443af7a
 # ╟─1e03e205-e80a-4739-9750-0b4bc4b87a5b
@@ -293,7 +301,7 @@ end
 # ╠═3ba4b4d4-a7b7-46dd-b7bc-0cd0fa24c993
 # ╠═0fabdeec-4bfa-4b9c-98c0-23c274d9fbaf
 # ╠═91269bf6-4e40-4fcc-932b-49f1c05c71dd
-# ╠═e76a5f9c-c92b-4ec3-835f-5e0539768af9
-# ╠═d9d735b3-7962-4fae-abe5-a24348e5974a
+# ╠═0adf5908-458e-4356-ae0b-dfc5f7d0e00f
 # ╠═a01618e3-472b-4d13-ac89-9549933948cb
+# ╠═d9d735b3-7962-4fae-abe5-a24348e5974a
 # ╠═fef18a1c-9850-45f2-9def-0bba541fc2af
