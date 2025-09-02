@@ -133,17 +133,6 @@ begin
 	fig1 = Figure(size=(800, 600)); nothing
 end
 
-# ╔═╡ 98050695-1fd1-4ecf-994d-06c2c8f70279
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex2.pdf", fig1)
-	input = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex2.pdf"
-	output = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex2.pdf"
-	run(`pdfcrop $input $output`)
-end
-  ╠═╡ =#
-
 # ╔═╡ 03dcf143-8168-40f0-a9ac-fefb23e742e8
 begin
 # -----------------------------------------------------------------------------------
@@ -240,17 +229,6 @@ begin
 	end
 end
 
-# ╔═╡ 7df517d3-d8f0-4273-85e4-b81d2dd5804b
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex3.pdf", fig2)
-	input = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex3.pdf"
-	output = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex3.pdf"
-	run(`pdfcrop $input $output`)
-end
-  ╠═╡ =#
-
 # ╔═╡ 0d00c12b-88a8-4c5b-b031-0c164a6f886b
 function plot_line(fig, f, row, col, xgra_list, colors, labels; 
 				   legend_offset=(0,0), legend_pos=:rt, N = 100)
@@ -341,6 +319,28 @@ let
 			  legend_pos=:rt, N=N)
 end
 
+# ╔═╡ 98050695-1fd1-4ecf-994d-06c2c8f70279
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex2.pdf", fig1)
+	input = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex2.pdf"
+	output = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex2.pdf"
+	run(`pdfcrop $input $output`)
+end
+  ╠═╡ =#
+
+# ╔═╡ 7df517d3-d8f0-4273-85e4-b81d2dd5804b
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex3.pdf", fig2)
+	input = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex3.pdf"
+	output = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/momentum_ex3.pdf"
+	run(`pdfcrop $input $output`)
+end
+  ╠═╡ =#
+
 # ╔═╡ Cell order:
 # ╠═70563c10-824b-11f0-2115-e93c87dcd75c
 # ╠═1dccf6e1-4108-4eac-afd3-8b7ba9288c05
@@ -348,7 +348,7 @@ end
 # ╠═527deac5-07bd-487c-a8a0-200cbaa031b6
 # ╟─9a78d420-1aaa-452e-b655-ca247e940a76
 # ╟─98ac464d-f8a0-4b0f-9175-2cd185703b96
-# ╟─ae7fda1b-4389-4524-b9b6-6ebf1d4ae754
+# ╠═ae7fda1b-4389-4524-b9b6-6ebf1d4ae754
 # ╟─cacef432-87f7-4977-a602-3f2adfe5b9a2
 # ╠═3decb336-9894-40ed-86d3-ef23038827c4
 # ╟─22b7adf3-7296-44e7-beeb-9a037087ba7b

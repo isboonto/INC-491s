@@ -93,6 +93,12 @@ function plot_track(row, col, fig, f, x1, x2, track)
 	fig
 end
 
+# ╔═╡ 0ad76ceb-0906-4ee7-9b57-079952f32cda
+# ╠═╡ disabled = true
+#=╠═╡
+save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/bisection_ex.pdf", fig1)
+  ╠═╡ =#
+
 # ╔═╡ 216d3cd6-e1c5-42c3-bde9-5664325e7655
 function bisection(f, a₀, b₀, ϵ)
 
@@ -156,12 +162,6 @@ end
 begin
 	global fig1 = Figure(size=(400*3, 200*size(track,2)/2)); nothing
 end
-
-# ╔═╡ 0ad76ceb-0906-4ee7-9b57-079952f32cda
-# ╠═╡ disabled = true
-#=╠═╡
-save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/bisection_ex.pdf", fig1)
-  ╠═╡ =#
 
 # ╔═╡ 1ea621ee-dc28-4cc8-8538-066167bad91d
 let

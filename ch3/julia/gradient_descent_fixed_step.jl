@@ -104,12 +104,6 @@ md"""
 α4 = $(@bind α4 PlutoUI.Slider([0.01, 0.05, 0.1, 0.25, 0.3, 0.4, 0.543, 0.6, 0.7, 1.0], show_value=true, default= 0.543))
 """
 
-# ╔═╡ 75863c55-09cf-47ea-b4dd-5e9d7a757c18
-# ╠═╡ disabled = true
-#=╠═╡
-save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/zig_zags.pdf", fig2)
-  ╠═╡ =#
-
 # ╔═╡ 8f0b493c-29f4-4ee3-a1fc-a13a1e4859ae
 function eigen_bounds(x::AbstractVector{<:Real}, f)
 	H = ForwardDiff.hessian(f, x)
@@ -261,6 +255,12 @@ begin
 	fig2 = Figure(size=(600,600))
 	plot_gd(α4, 1, 1, xrgra4, :red, fig2)
 end
+
+# ╔═╡ 75863c55-09cf-47ea-b4dd-5e9d7a757c18
+# ╠═╡ disabled = true
+#=╠═╡
+save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/zig_zags.pdf", fig2)
+  ╠═╡ =#
 
 # ╔═╡ 5a80f411-f53a-4742-9a45-1f550f207a55
 begin
