@@ -106,7 +106,7 @@ begin
 end
 
 # ╔═╡ b302d84b-48bf-445d-9972-0fb16fe4457f
-θ4 , θ4_history = stochastic_gradient(X_b, y)
+θ4 , θ4_history = stochastic_gradient(X_b, y; η = 0.1)
 
 # ╔═╡ 91cf50ec-e959-4b3a-be9d-4d0efac5c525
 begin	

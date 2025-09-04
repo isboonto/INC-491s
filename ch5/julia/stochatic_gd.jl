@@ -154,6 +154,9 @@ begin
 	x_sdg, b_sdg, mse_history_sdg = sgd_batch1(A, y)
 end
 
+# ╔═╡ 9f4cb262-9c50-42d7-873a-9782ff99ade8
+xfull, xmini, x_sdg
+
 # ╔═╡ 371ae476-99ea-44c3-b115-eadd77557e65
 let
 	global fig1 = Figure(size=(600, 500)); nothing
@@ -180,6 +183,17 @@ let
 	fig1
 end
 
+# ╔═╡ bce65c1b-1786-453e-a28f-bf902f7f29d6
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient.pdf", fig1)
+	input = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient.pdf"
+	output = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient.pdf"
+	run(`pdfcrop $input $output`)
+end
+  ╠═╡ =#
+
 # ╔═╡ f2c59982-1027-49b9-ae16-5479d2bf129d
 begin
 	@time xmini_1, bmini_1, mse_history_mini_1 = mini_batch_sgd(A, y; batch_size = 1)
@@ -202,6 +216,17 @@ let
 
 	fig2
 end
+
+# ╔═╡ 5d91442f-81bd-41b3-b3a6-a9a1cff02a2a
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient2.pdf", fig2)
+	input = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient2.pdf"
+	output = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient2.pdf"
+	run(`pdfcrop $input $output`)
+end
+  ╠═╡ =#
 
 # ╔═╡ 77bd4fc3-2079-4c1b-a3e3-34e03e78d818
 md"""
@@ -422,6 +447,17 @@ let
 	fig3
 end
 
+# ╔═╡ a7c60771-57e3-4b33-8181-544129f86f00
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient3.pdf", fig3)
+	input = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient3.pdf"
+	output = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient3.pdf"
+	run(`pdfcrop $input $output`)
+end
+  ╠═╡ =#
+
 # ╔═╡ fa8fce40-2427-43c1-87e8-955adb1c713d
 let
 	global fig4 = Figure(size=(600, 300))
@@ -441,28 +477,6 @@ let
 	fig4
 end
 
-# ╔═╡ bce65c1b-1786-453e-a28f-bf902f7f29d6
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient.pdf", fig1)
-	input = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient.pdf"
-	output = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient.pdf"
-	run(`pdfcrop $input $output`)
-end
-  ╠═╡ =#
-
-# ╔═╡ 5d91442f-81bd-41b3-b3a6-a9a1cff02a2a
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient2.pdf", fig2)
-	input = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient2.pdf"
-	output = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient2.pdf"
-	run(`pdfcrop $input $output`)
-end
-  ╠═╡ =#
-
 # ╔═╡ c51cf85c-eaa4-4837-951b-fd4363a86db6
 # ╠═╡ disabled = true
 #=╠═╡
@@ -470,17 +484,6 @@ begin
 	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient4.pdf", fig4)
 	input = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient4.pdf"
 	output = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient4.pdf"
-	run(`pdfcrop $input $output`)
-end
-  ╠═╡ =#
-
-# ╔═╡ a7c60771-57e3-4b33-8181-544129f86f00
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	save("/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient3.pdf", fig3)
-	input = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient3.pdf"
-	output = "/mnt/e/OneDrive/Public/workKMUTT/INC Selection Optimization/Lecture2022/images/batch_gradient3.pdf"
 	run(`pdfcrop $input $output`)
 end
   ╠═╡ =#
@@ -493,6 +496,7 @@ end
 # ╠═7460106e-9309-451b-8672-a01a0a9655f1
 # ╠═fd7872af-3085-49ba-bf7f-97fc3761075f
 # ╠═1fb81a1d-7cbb-4ac2-b64b-69b5659e0527
+# ╠═9f4cb262-9c50-42d7-873a-9782ff99ade8
 # ╠═371ae476-99ea-44c3-b115-eadd77557e65
 # ╠═3e2a96ea-8988-4703-9726-c48d7a3c80e7
 # ╠═bce65c1b-1786-453e-a28f-bf902f7f29d6
@@ -500,7 +504,7 @@ end
 # ╠═9defc413-49b8-41bb-864a-4c351734fc35
 # ╠═5d91442f-81bd-41b3-b3a6-a9a1cff02a2a
 # ╟─77bd4fc3-2079-4c1b-a3e3-34e03e78d818
-# ╠═22b98f00-d849-48e4-bdfd-88fdbba4f930
+# ╟─22b98f00-d849-48e4-bdfd-88fdbba4f930
 # ╠═3b402d95-cfc8-440b-ac5c-3855aa1495dd
 # ╠═4ccc09af-2455-48f7-9d59-02be3a291820
 # ╠═dad3194a-f716-4143-bae2-a705ab988381
